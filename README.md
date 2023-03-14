@@ -1,2 +1,2 @@
-# go-web-project-itcs-4102
-A simple web application built using the Go programming language.
+# Go Web Project
+A simple web application built using the Go programming language in our ITCS 4102 class.
