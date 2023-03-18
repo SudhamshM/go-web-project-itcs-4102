@@ -16,6 +16,7 @@ func main() {
 	http.HandleFunc("/", handler)
 	http.HandleFunc("/about", about)
 	http.HandleFunc("/contact", contact)
+	http.HandleFunc("/edit", edit)
 	http.ListenAndServe(":3000", nil)
 }
 
@@ -64,25 +65,6 @@ func about(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func template_getter() (*template.Template, error) {
-	t := template.New("")
-	// Get a list of all files that match the "templates/*" pattern
-	files, err := filepath.Glob("templates/*")
-	if err != nil {
-		print(err)
-	}
-
-	// Parse each file using the ParseFiles method of the template set
-	t, err = t.ParseFiles(files...)
-	if err != nil {
-		print(err)
-	}
-
-	// makes sure template files are processed correctly
-	// fmt.Println(files)
-	return t, nil
-}
-
 func contact(w http.ResponseWriter, r *http.Request) {
 	data := Page{
 		Title:  "Contact Page",
@@ -102,4 +84,42 @@ func contact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+}
+
+func edit(w http.ResponseWriter, r *http.Request) {
+	data := Page{
+		Title:  "Edit Page!",
+		Body:   "Welcome to my about page.",
+		Sample: "Edit",
+	}
+	t, err := template_getter()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err2 := t.ExecuteTemplate(w, "edit.html", data)
+	if err2 != nil {
+		http.Error(w, err2.Error(), http.StatusInternalServerError)
+		return
+	}
+
+}
+
+func template_getter() (*template.Template, error) {
+	t := template.New("")
+	// Get a list of all files that match the "templates/*" pattern
+	files, err := filepath.Glob("templates/*")
+	if err != nil {
+		print(err)
+	}
+
+	// Parse each file using the ParseFiles method of the template set
+	t, err = t.ParseFiles(files...)
+	if err != nil {
+		print(err)
+	}
+
+	// makes sure template files are processed correctly
+	// fmt.Println(files)
+	return t, nil
 }
