@@ -14,7 +14,7 @@ func greet(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/", handler)
 	http.HandleFunc("/about", about)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":3000", nil)
 }
 
 type Page struct {
@@ -25,10 +25,11 @@ type Page struct {
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	data := Page{
-		Title:  "Hello, World!",
-		Body:   "Welcome to my Go web application.",
-		Sample: "Ajay",
+		Title:  "Hello there",
+		Body:   "Welcome to the UNC Charlotte Blog Website.",
+		Sample: "Students can ask their peers for any help or share any advice for their peers relating to matters such as classes, clubs, sports, or other extracurricular activities.",
 	}
+
 	templates := template.Must(template.ParseFiles("navbar.html", "main.html"))
 	// Execute the navbar template
 	err := templates.ExecuteTemplate(w, "main.html", data)
