@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"path/filepath"
 	"time"
 )
 
@@ -29,11 +30,15 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		Body:   "Welcome to my Go web application.",
 		Sample: "Ajay",
 	}
-	templates := template.Must(template.ParseFiles("navbar.html", "main.html"))
-	// Execute the navbar template
-	err := templates.ExecuteTemplate(w, "main.html", data)
+
+	t, err := template_getter()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err2 := t.ExecuteTemplate(w, "main.html", data)
+	if err2 != nil {
+		http.Error(w, err2.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -45,12 +50,32 @@ func about(w http.ResponseWriter, r *http.Request) {
 		Body:   "Welcome to my about page.",
 		Sample: "ABOUT!",
 	}
-
-	templates := template.Must(template.ParseFiles("about.html", "main.html", "navbar.html"))
-	// Execute the navbar template
-	err := templates.ExecuteTemplate(w, "about.html", data)
+	t, err := template_getter()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	err2 := t.ExecuteTemplate(w, "about.html", data)
+	if err2 != nil {
+		http.Error(w, err2.Error(), http.StatusInternalServerError)
+		return
+	}
+
+}
+
+func template_getter() (*template.Template, error) {
+	t := template.New("")
+	// Get a list of all files that match the "templates/*" pattern
+	files, err := filepath.Glob("templates/*")
+	if err != nil {
+		print(err)
+	}
+
+	// Parse each file using the ParseFiles method of the template set
+	t, err = t.ParseFiles(files...)
+	if err != nil {
+		print(err)
+	}
+
+	return t, nil
 }
