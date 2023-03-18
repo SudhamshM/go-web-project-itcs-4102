@@ -15,6 +15,7 @@ func greet(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/", handler)
 	http.HandleFunc("/about", about)
+	http.HandleFunc("/contact", contact)
 	http.ListenAndServe(":3000", nil)
 }
 
@@ -78,4 +79,24 @@ func template_getter() (*template.Template, error) {
 	}
 
 	return t, nil
+}
+
+func contact(w http.ResponseWriter, r *http.Request) {
+	data := Page{
+		Title:  "Contact Page",
+		Body:   "Welcome to the contact page",
+		Sample: "Please don't contact us about this site no one will response. ",
+	}
+
+	t, err := template_getter()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err2 := t.ExecuteTemplate(w, "about.html", data)
+	if err2 != nil {
+		http.Error(w, err2.Error(), http.StatusInternalServerError)
+		return
+	}
+
 }
