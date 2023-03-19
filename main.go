@@ -13,6 +13,10 @@ func greet(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	// serving static files using file server
+	fs := http.FileServer(http.Dir("public/"))
+	http.Handle("/public/", http.StripPrefix("/public/", fs))
+
 	http.HandleFunc("/", handler)
 	http.HandleFunc("/about", about)
 	http.HandleFunc("/contact", contact)
