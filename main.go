@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"os"
 	"path/filepath"
 	"time"
 )
@@ -13,6 +14,11 @@ func greet(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	var host = os.Getenv("PORT")
+	if host == "" {
+		print("empty default host\n")
+		host = "3000"
+	}
 	// serving static files using file server
 	fs := http.FileServer(http.Dir("public/"))
 	http.Handle("/public/", http.StripPrefix("/public/", fs))
@@ -22,7 +28,7 @@ func main() {
 	http.HandleFunc("/contact", contact)
 	http.HandleFunc("/signup", signup)
 	http.HandleFunc("/edit", edit)
-	http.ListenAndServe(":3000", nil)
+	http.ListenAndServe(":"+host, nil)
 }
 
 type Page struct {
