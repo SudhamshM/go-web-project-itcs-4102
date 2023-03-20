@@ -2,4 +2,25 @@
         <h1>{{.Title}}</h1>
         <p>{{.Body}}</p>
         <p>{{.Sample}}</p>
+
+        <div class="container">
+                <form>
+                        <div class="mb-3">
+                                <label for="exampleFormControlInput1" class="form-label">Email address</label>
+                                <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="name@example.com">
+                        </div>
+                        <div class="mb-3">
+                                <label for="exampleFormControlTextarea1" class="form-label">Password</label>
+                                <textarea placeholder="Enter a strong password" required class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                                <label for="exampleFormControlTextarea1" class="form-label">Confirm Password</label>
+                                <textarea placeholder="Confirm your password" required class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                                <button type="submit" class="btn btn-dark mb-3"> Sign Up </button>
+                        </div>
+                </form>
+        </div>
+       
 {{template "footer"}}
