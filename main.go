@@ -20,6 +20,7 @@ func main() {
 	http.HandleFunc("/", handler)
 	http.HandleFunc("/about", about)
 	http.HandleFunc("/contact", contact)
+	http.HandleFunc("/signup", signup)
 	http.HandleFunc("/edit", edit)
 	http.ListenAndServe(":3000", nil)
 }
@@ -82,6 +83,26 @@ func contact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	err2 := t.ExecuteTemplate(w, "contact.html", data)
+	if err2 != nil {
+		fmt.Println(err2)
+		http.Error(w, err2.Error(), http.StatusInternalServerError)
+		return
+	}
+
+}
+
+func signup(w http.ResponseWriter, r *http.Request) {
+	data := Page{
+		Title: "Sign Up",
+		Body:  "Welcome to the sign up page",
+	}
+
+	t, err := template_getter()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err2 := t.ExecuteTemplate(w, "signup.html", data)
 	if err2 != nil {
 		fmt.Println(err2)
 		http.Error(w, err2.Error(), http.StatusInternalServerError)
