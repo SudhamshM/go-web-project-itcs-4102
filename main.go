@@ -10,31 +10,19 @@ import (
 )
 
 func main() {
+	// getting port env variable for render
 	var host = os.Getenv("PORT")
 	if host == "" {
 		print("Website running on port 3000, go to localhost:3000\n")
 		host = "3000"
 	}
-
+	// setting router for requests and static folders/files
 	router := gin.Default()
 	router.GET("/posts/:id", singlePost)
 
-	// serving static files using file server
-	// fs := http.FileServer(http.Dir("public/"))
-	// http.Handle("/public/", http.StripPrefix("/public/", fs))
-	// mux := http.NewServeMux()
-	// mux.HandleFunc("/", handler)
-	// // http.HandleFunc("/", handler)
-	// mux.HandleFunc("/about", about)
-	// mux.HandleFunc("/contact", contact)
-	// mux.HandleFunc("/signup", signup)
-	// mux.HandleFunc("/edit", edit)
-	// mux.HandleFunc("/blog", blog)
-	// mux.HandleFunc("/newblog", newblog)
-	// http.ListenAndServe(":"+host, mux)
 	router.LoadHTMLGlob("templates/*")
 	router.Static("/public/", "./public/")
-
+	// route handlers
 	router.GET("/", func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "main.html", gin.H{
 			"Title":  "Hello there",
@@ -108,12 +96,14 @@ func main() {
 	router.Run(":" + host)
 }
 
+// basic Page struct for info
 type Page struct {
 	Title  string
 	Body   string
 	Sample string
 }
 
+// blog post struct
 type BlogPosts struct {
 	FirstName   string `json:"firstname"`
 	TitlePost   string `json:"title"`
@@ -121,6 +111,7 @@ type BlogPosts struct {
 	PostID      uuid.UUID
 }
 
+// array to hold all posts
 var bigArray []BlogPosts
 
 func singlePost(c *gin.Context) {
@@ -139,6 +130,7 @@ func singlePost(c *gin.Context) {
 
 }
 
+// get posts by id to show specific post
 func getPostById(id string) *BlogPosts {
 	for i := 0; i < len(bigArray); i++ {
 		if bigArray[i].PostID.String() == id {
