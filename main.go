@@ -16,7 +16,7 @@ func greet(w http.ResponseWriter, r *http.Request) {
 func main() {
 	var host = os.Getenv("PORT")
 	if host == "" {
-		print("empty default host\n")
+		print("Website running on port 3000, go to https://localhost:3000\n")
 		host = "3000"
 	}
 	// serving static files using file server
