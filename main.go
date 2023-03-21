@@ -27,29 +27,95 @@ func main() {
 	}
 
 	router := gin.Default()
-	router.GET("/newblog", func(c *gin.Context) {
-		c.JSON(200, blogArray)
-	})
-
-	router.POST("/newblog", func(c *gin.Context) {
-		c.JSON(http.StatusAccepted, &blogArray)
-
-	})
+	router.GET("/posts/:id", singlePost)
 
 	// serving static files using file server
-	fs := http.FileServer(http.Dir("public/"))
-	http.Handle("/public/", http.StripPrefix("/public/", fs))
+	// fs := http.FileServer(http.Dir("public/"))
+	// http.Handle("/public/", http.StripPrefix("/public/", fs))
+	// mux := http.NewServeMux()
+	// mux.HandleFunc("/", handler)
+	// // http.HandleFunc("/", handler)
+	// mux.HandleFunc("/about", about)
+	// mux.HandleFunc("/contact", contact)
+	// mux.HandleFunc("/signup", signup)
+	// mux.HandleFunc("/edit", edit)
+	// mux.HandleFunc("/blog", blog)
+	// mux.HandleFunc("/newblog", newblog)
+	// http.ListenAndServe(":"+host, mux)
+	router.LoadHTMLGlob("templates/*")
+	router.Static("/public/", "./")
 
-	http.HandleFunc("/", handler)
-	http.HandleFunc("/about", about)
-	http.HandleFunc("/contact", contact)
-	http.HandleFunc("/signup", signup)
-	http.HandleFunc("/edit", edit)
-	http.HandleFunc("/blog", blog)
-	http.HandleFunc("/newblog", newblog)
-	http.ListenAndServe(":"+host, nil)
+	router.GET("/", func(ctx *gin.Context) {
+		ctx.HTML(http.StatusOK, "main.html", gin.H{
+			"Title":  "Hello there",
+			"Body":   "Welcome to the UNC Charlotte Blog Website.",
+			"Sample": "Students can ask their peers for any help or share any advice for their peers relating to matters such as classes, clubs, sports, or other extracurricular activities.",
+		})
+	})
 
-	router.Run()
+	router.GET("/posts", func(ctx *gin.Context) {
+		if len(bigArray) == 0 {
+			ctx.HTML(http.StatusOK, "posts.html", gin.H{
+				"error":    true,
+				"hasPosts": false,
+			})
+			return
+		} else {
+			ctx.HTML(http.StatusOK, "posts.html", gin.H{
+				"error":    false,
+				"bigArray": bigArray,
+				"hasPosts": true,
+			})
+		}
+	})
+
+	router.GET("/newblog", func(ctx *gin.Context) {
+		ctx.HTML(http.StatusOK, "newblog.html", nil)
+	})
+
+	router.POST("/newblog", func(ctx *gin.Context) {
+		var r = ctx.Request
+		var newBlog BlogPosts = BlogPosts{
+			FirstName:   r.FormValue("firstName"),
+			TitlePost:   r.FormValue("blogTitle"),
+			ContentPost: r.FormValue("blogContent"),
+			PostID:      uuid.New(),
+		}
+		bigArray = append(bigArray, newBlog)
+		ctx.HTML(http.StatusOK, "posts.html", gin.H{
+			"error":    false,
+			"bigArray": bigArray,
+			"hasPosts": true,
+		})
+	})
+
+	router.GET("/about", func(ctx *gin.Context) {
+		data := Page{
+			Title:  "About Page!",
+			Body:   "Welcome to my about page.",
+			Sample: "ABOUT!",
+		}
+		ctx.HTML(http.StatusOK, "about.html", data)
+	})
+
+	router.GET("/contact", func(ctx *gin.Context) {
+		data := Page{
+			Title:  "Contact Page",
+			Body:   "Welcome to the contact page",
+			Sample: "Please don't contact us about this site no one will response. ",
+		}
+		ctx.HTML(http.StatusOK, "contact.html", data)
+	})
+
+	router.GET("/signup", func(ctx *gin.Context) {
+		data := Page{
+			Title: "Sign Up",
+			Body:  "Welcome to the sign up page",
+		}
+		ctx.HTML(http.StatusOK, "signup.html", data)
+	})
+
+	router.Run(":" + host)
 }
 
 type Page struct {
@@ -69,6 +135,7 @@ var blogArray []BlogPosts
 var bigArray []BlogPosts
 
 func handler(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("Main handler: %v\n", r.URL.Path)
 	data := Page{
 		Title:  "Hello there",
 		Body:   "Welcome to the UNC Charlotte Blog Website.",
@@ -182,16 +249,10 @@ func template_getter() (*template.Template, error) {
 	}
 
 	// makes sure template files are processed correctly
-	// fmt.Println(files)
 	return t, nil
 }
 
 func blog(w http.ResponseWriter, r *http.Request) {
-	/*blogArray = []BlogPosts{
-		{FirstName: "Brijesh", TitlePost: "test title", ContentPost: "This is a test of posting a post."},
-		//{FirstName: "Ajay", TitlePost: "Title 1", ContentPost: "This is another post."},
-		//{FirstName: "Mevlin", TitlePost: "Title 2", ContentPost: "This is another post part two."},
-	}*/
 
 	t, err := template_getter()
 	if err != nil {
@@ -234,4 +295,29 @@ func newblog(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+}
+
+func singlePost(c *gin.Context) {
+	id := c.Param("id")
+	post := getPostById(id)
+	fmt.Println("finding post...")
+	if post == nil {
+		// if post is not there
+		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+		return
+	}
+
+	c.HTML(http.StatusOK, "post.html", gin.H{
+		"post": post,
+	})
+
+}
+
+func getPostById(id string) *BlogPosts {
+	for i := 0; i < len(bigArray); i++ {
+		if bigArray[i].PostID.String() == id {
+			return &bigArray[i]
+		}
+	}
+	return nil
 }

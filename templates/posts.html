@@ -1,8 +1,12 @@
 {{template "header"}}
 <div class="row mt-1">
-    {{ range $index, $element := . }}
+    {{if .error}}
+    <h1>No posts here. Create them <a href="/newblog">here!</a></h1>
+    {{end}}
+    {{if .hasPosts}}
+    {{ range $index, $element := .bigArray }}
         <div class="col-sm-3 pb-1">
-          <div class="card">
+          <div class="card shadow-sm">
             <div class="card-body">
                 <h5 class="card-title">{{$element.TitlePost}}</h5>
                 <p class="card-text">Author: {{$element.FirstName}} </p>
@@ -10,6 +14,7 @@
               </div>
           </div>
         </div>
+      {{end}}
       {{end}}
     </div>
 {{template "footer"}}
