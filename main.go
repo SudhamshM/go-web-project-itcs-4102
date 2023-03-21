@@ -18,7 +18,7 @@ func greet(w http.ResponseWriter, r *http.Request) {
 func main() {
 	var host = os.Getenv("PORT")
 	if host == "" {
-		print("Website running on port 3000, go to https://localhost:3000\n")
+		print("Website running on port 3000, go to localhost:3000\n")
 		host = "3000"
 	}
 	blogArray = []BlogPosts{
