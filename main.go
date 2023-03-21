@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func greet(w http.ResponseWriter, r *http.Request) {
@@ -61,9 +62,11 @@ type BlogPosts struct {
 	FirstName   string `json:"firstname"`
 	TitlePost   string `json:"title"`
 	ContentPost string `json:"contentpost"`
+	PostID      uuid.UUID
 }
 
 var blogArray []BlogPosts
+var bigArray []BlogPosts
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	data := Page{
@@ -189,18 +192,13 @@ func blog(w http.ResponseWriter, r *http.Request) {
 		//{FirstName: "Ajay", TitlePost: "Title 1", ContentPost: "This is another post."},
 		//{FirstName: "Mevlin", TitlePost: "Title 2", ContentPost: "This is another post part two."},
 	}*/
-	blogArray := BlogPosts{
-		FirstName:   "Brijesh",
-		TitlePost:   "test title",
-		ContentPost: "This is a test of posting a post.",
-	}
 
 	t, err := template_getter()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err2 := t.ExecuteTemplate(w, "posts.html", blogArray)
+	err2 := t.ExecuteTemplate(w, "posts.html", bigArray)
 	if err2 != nil {
 		http.Error(w, err2.Error(), http.StatusInternalServerError)
 		return
@@ -209,20 +207,31 @@ func blog(w http.ResponseWriter, r *http.Request) {
 }
 
 func newblog(w http.ResponseWriter, r *http.Request) {
-	blogArrays := BlogPosts{
-		FirstName:   "Brijesh",
-		TitlePost:   "test title",
-		ContentPost: "This is a test of posting a post.",
-	}
 	t, err := template_getter()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err2 := t.ExecuteTemplate(w, "newblog.html", blogArrays)
-	if err2 != nil {
-		http.Error(w, err2.Error(), http.StatusInternalServerError)
-		return
+	// check if request method is GET or POST and return aptly
+	if r.Method == "GET" {
+		err2 := t.ExecuteTemplate(w, "newblog.html", nil)
+		if err2 != nil {
+			http.Error(w, err2.Error(), http.StatusInternalServerError)
+			return
+		}
+	} else if r.Method == "POST" {
+		var newBlog BlogPosts = BlogPosts{
+			FirstName:   r.FormValue("firstName"),
+			TitlePost:   r.FormValue("blogTitle"),
+			ContentPost: r.FormValue("blogContent"),
+			PostID:      uuid.New(),
+		}
+		bigArray = append(bigArray, newBlog)
+		err2 := t.ExecuteTemplate(w, "posts.html", bigArray)
+		if err2 != nil {
+			http.Error(w, err2.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 
 }

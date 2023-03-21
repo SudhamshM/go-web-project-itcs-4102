@@ -1,5 +1,15 @@
 {{template "header"}}
-    <h1>Written by: {{.FirstName}}</h1>
-    <p>Title: {{.TitlePost}}</p>
-    <p>{{.ContentPost}}</p>
+<div class="row mt-1">
+    {{ range $index, $element := . }}
+        <div class="col-sm-3 pb-1">
+          <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{$element.TitlePost}}</h5>
+                <p class="card-text">Author: {{$element.FirstName}} </p>
+                <a href="/posts/{{$element.PostID}}" class="btn btn-primary">Read it here</a>
+              </div>
+          </div>
+        </div>
+      {{end}}
+    </div>
 {{template "footer"}}
