@@ -44,6 +44,8 @@ func main() {
 	http.HandleFunc("/contact", contact)
 	http.HandleFunc("/signup", signup)
 	http.HandleFunc("/edit", edit)
+	http.HandleFunc("/blog", blog)
+	http.HandleFunc("/newblog", newblog)
 	http.ListenAndServe(":"+host, nil)
 
 	router.Run()
