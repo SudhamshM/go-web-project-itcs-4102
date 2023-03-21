@@ -19,6 +19,20 @@ func main() {
 		print("Website running on port 3000, go to https://localhost:3000\n")
 		host = "3000"
 	}
+	blogArray = []BlogPosts{
+		{FirstName: "Brijesh", TitlePost: "test title", ContentPost: "This is a test of posting a post."},
+	}
+
+	router := gin.Default()
+	router.GET("/newblog", func(c *gin.Context) {
+		c.JSON(200, blogArray)
+	})
+
+	router.POST("/newblog", func(c *gin.Context) {
+		c.JSON(http.StatusAccepted, &blogArray)
+
+	})
+	
 	// serving static files using file server
 	fs := http.FileServer(http.Dir("public/"))
 	http.Handle("/public/", http.StripPrefix("/public/", fs))
@@ -29,6 +43,8 @@ func main() {
 	http.HandleFunc("/signup", signup)
 	http.HandleFunc("/edit", edit)
 	http.ListenAndServe(":"+host, nil)
+	
+	router.Run()
 }
 
 type Page struct {
@@ -36,6 +52,15 @@ type Page struct {
 	Body   string
 	Sample string
 }
+
+type BlogPosts struct {
+	FirstName   string `json:"firstname"`
+	TitlePost   string `json:"title"`
+	ContentPost string `json:"contentpost"`
+}
+
+var blogArray []BlogPosts
+
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	data := Page{
@@ -153,4 +178,48 @@ func template_getter() (*template.Template, error) {
 	// makes sure template files are processed correctly
 	// fmt.Println(files)
 	return t, nil
+}
+
+func blog(w http.ResponseWriter, r *http.Request) {
+	/*blogArray = []BlogPosts{
+		{FirstName: "Brijesh", TitlePost: "test title", ContentPost: "This is a test of posting a post."},
+		//{FirstName: "Ajay", TitlePost: "Title 1", ContentPost: "This is another post."},
+		//{FirstName: "Mevlin", TitlePost: "Title 2", ContentPost: "This is another post part two."},
+	}*/
+	blogArray := BlogPosts{
+		FirstName:   "Brijesh",
+		TitlePost:   "test title",
+		ContentPost: "This is a test of posting a post.",
+	}
+
+	t, err := template_getter()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err2 := t.ExecuteTemplate(w, "posts.html", blogArray)
+	if err2 != nil {
+		http.Error(w, err2.Error(), http.StatusInternalServerError)
+		return
+	}
+
+}
+
+func newblog(w http.ResponseWriter, r *http.Request) {
+	blogArrays := BlogPosts{
+		FirstName:   "Brijesh",
+		TitlePost:   "test title",
+		ContentPost: "This is a test of posting a post.",
+	}
+	t, err := template_getter()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err2 := t.ExecuteTemplate(w, "newblog.html", blogArrays)
+	if err2 != nil {
+		http.Error(w, err2.Error(), http.StatusInternalServerError)
+		return
+	}
+
 }
