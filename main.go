@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 
+	"html/template"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -16,12 +18,14 @@ func main() {
 		print("Website running on port 3000, go to localhost:3000\n")
 		host = "3000"
 	}
-	// setting router for requests and static folders/files
+	// setting router & template for requests and static folders/files
+	t := template.Must(template.ParseGlob("templates/*.html"))
+	template.Must(t.ParseGlob("templates/partials/*.html"))
 	router := gin.Default()
-	router.GET("/posts/:id", singlePost)
-
-	router.LoadHTMLGlob("templates/*")
+	router.SetHTMLTemplate(t)
 	router.Static("/public/", "./public/")
+	router.SetTrustedProxies(nil)
+
 	// route handlers
 	router.GET("/", func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "main.html", gin.H{
@@ -46,6 +50,8 @@ func main() {
 			})
 		}
 	})
+
+	router.GET("/posts/:id", singlePost)
 
 	router.GET("/newblog", func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "newblog.html", nil)
