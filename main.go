@@ -43,7 +43,7 @@ func main() {
 	// mux.HandleFunc("/newblog", newblog)
 	// http.ListenAndServe(":"+host, mux)
 	router.LoadHTMLGlob("templates/*")
-	router.Static("/public/", "./")
+	router.Static("/public/", "./public/")
 
 	router.GET("/", func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "main.html", gin.H{
