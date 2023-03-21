@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 func greet(w http.ResponseWriter, r *http.Request) {
@@ -32,7 +34,7 @@ func main() {
 		c.JSON(http.StatusAccepted, &blogArray)
 
 	})
-	
+
 	// serving static files using file server
 	fs := http.FileServer(http.Dir("public/"))
 	http.Handle("/public/", http.StripPrefix("/public/", fs))
@@ -43,7 +45,7 @@ func main() {
 	http.HandleFunc("/signup", signup)
 	http.HandleFunc("/edit", edit)
 	http.ListenAndServe(":"+host, nil)
-	
+
 	router.Run()
 }
 
@@ -60,7 +62,6 @@ type BlogPosts struct {
 }
 
 var blogArray []BlogPosts
-
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	data := Page{
