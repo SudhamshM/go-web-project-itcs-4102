@@ -6,24 +6,16 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
-
-func greet(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello World! %s", time.Now())
-}
 
 func main() {
 	var host = os.Getenv("PORT")
 	if host == "" {
 		print("Website running on port 3000, go to localhost:3000\n")
 		host = "3000"
-	}
-	blogArray = []BlogPosts{
-		{FirstName: "Brijesh", TitlePost: "test title", ContentPost: "This is a test of posting a post."},
 	}
 
 	router := gin.Default()
@@ -131,7 +123,6 @@ type BlogPosts struct {
 	PostID      uuid.UUID
 }
 
-var blogArray []BlogPosts
 var bigArray []BlogPosts
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -148,85 +139,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	err2 := t.ExecuteTemplate(w, "main.html", data)
-	if err2 != nil {
-		http.Error(w, err2.Error(), http.StatusInternalServerError)
-		return
-	}
-
-}
-
-func about(w http.ResponseWriter, r *http.Request) {
-	data := Page{
-		Title:  "About Page!",
-		Body:   "Welcome to my about page.",
-		Sample: "ABOUT!",
-	}
-	t, err := template_getter()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	err2 := t.ExecuteTemplate(w, "about.html", data)
-	if err2 != nil {
-		http.Error(w, err2.Error(), http.StatusInternalServerError)
-		return
-	}
-
-}
-
-func contact(w http.ResponseWriter, r *http.Request) {
-	data := Page{
-		Title:  "Contact Page",
-		Body:   "Welcome to the contact page",
-		Sample: "Please don't contact us about this site no one will response. ",
-	}
-
-	t, err := template_getter()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	err2 := t.ExecuteTemplate(w, "contact.html", data)
-	if err2 != nil {
-		fmt.Println(err2)
-		http.Error(w, err2.Error(), http.StatusInternalServerError)
-		return
-	}
-
-}
-
-func signup(w http.ResponseWriter, r *http.Request) {
-	data := Page{
-		Title: "Sign Up",
-		Body:  "Welcome to the sign up page",
-	}
-
-	t, err := template_getter()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	err2 := t.ExecuteTemplate(w, "signup.html", data)
-	if err2 != nil {
-		fmt.Println(err2)
-		http.Error(w, err2.Error(), http.StatusInternalServerError)
-		return
-	}
-
-}
-
-func edit(w http.ResponseWriter, r *http.Request) {
-	data := Page{
-		Title:  "Edit Page!",
-		Body:   "Welcome to my about page.",
-		Sample: "Edit",
-	}
-	t, err := template_getter()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	err2 := t.ExecuteTemplate(w, "edit.html", data)
 	if err2 != nil {
 		http.Error(w, err2.Error(), http.StatusInternalServerError)
 		return
