@@ -2,10 +2,8 @@ package main
 
 import (
 	"fmt"
-	"html/template"
 	"net/http"
 	"os"
-	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -124,90 +122,6 @@ type BlogPosts struct {
 }
 
 var bigArray []BlogPosts
-
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("Main handler: %v\n", r.URL.Path)
-	data := Page{
-		Title:  "Hello there",
-		Body:   "Welcome to the UNC Charlotte Blog Website.",
-		Sample: "Students can ask their peers for any help or share any advice for their peers relating to matters such as classes, clubs, sports, or other extracurricular activities.",
-	}
-
-	t, err := template_getter()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	err2 := t.ExecuteTemplate(w, "main.html", data)
-	if err2 != nil {
-		http.Error(w, err2.Error(), http.StatusInternalServerError)
-		return
-	}
-
-}
-
-func template_getter() (*template.Template, error) {
-	t := template.New("")
-	// Get a list of all files that match the "templates/*" pattern
-	files, err := filepath.Glob("templates/*")
-	if err != nil {
-		print(err)
-	}
-
-	// Parse each file using the ParseFiles method of the template set
-	t, err = t.ParseFiles(files...)
-	if err != nil {
-		print(err)
-	}
-
-	// makes sure template files are processed correctly
-	return t, nil
-}
-
-func blog(w http.ResponseWriter, r *http.Request) {
-
-	t, err := template_getter()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	err2 := t.ExecuteTemplate(w, "posts.html", bigArray)
-	if err2 != nil {
-		http.Error(w, err2.Error(), http.StatusInternalServerError)
-		return
-	}
-
-}
-
-func newblog(w http.ResponseWriter, r *http.Request) {
-	t, err := template_getter()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	// check if request method is GET or POST and return aptly
-	if r.Method == "GET" {
-		err2 := t.ExecuteTemplate(w, "newblog.html", nil)
-		if err2 != nil {
-			http.Error(w, err2.Error(), http.StatusInternalServerError)
-			return
-		}
-	} else if r.Method == "POST" {
-		var newBlog BlogPosts = BlogPosts{
-			FirstName:   r.FormValue("firstName"),
-			TitlePost:   r.FormValue("blogTitle"),
-			ContentPost: r.FormValue("blogContent"),
-			PostID:      uuid.New(),
-		}
-		bigArray = append(bigArray, newBlog)
-		err2 := t.ExecuteTemplate(w, "posts.html", bigArray)
-		if err2 != nil {
-			http.Error(w, err2.Error(), http.StatusInternalServerError)
-			return
-		}
-	}
-
-}
 
 func singlePost(c *gin.Context) {
 	id := c.Param("id")
