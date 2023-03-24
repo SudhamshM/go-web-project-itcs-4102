@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -27,7 +28,7 @@ func main() {
 	}
 
 	databaseCollection = client.Database("goDatabase").Collection("users")
-	
+
 	// getting port env variable for render
 	var host = os.Getenv("PORT")
 	if host == "" {
@@ -114,7 +115,7 @@ func main() {
 		}
 		ctx.HTML(http.StatusOK, "signup.html", data)
 	})
-	
+
 	router.POST("signup", func(ctx *gin.Context) {
 		name := ctx.PostForm("username")
 		email := ctx.PostForm("email")
