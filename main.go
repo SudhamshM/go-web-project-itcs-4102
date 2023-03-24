@@ -9,9 +9,25 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func main() {
+	var databaseCollection *mongo.Collection
+	ctx := context.TODO()
+	options := options.Client().ApplyURI("mongodb://localhost:27017")
+	client, err := mongo.Connect(ctx, options)
+
+	if err != nil {
+		panic(err)
+	}
+
+	databaseCollection = client.Database("goDatabase").Collection("users")
+	
 	// getting port env variable for render
 	var host = os.Getenv("PORT")
 	if host == "" {
@@ -98,6 +114,40 @@ func main() {
 		}
 		ctx.HTML(http.StatusOK, "signup.html", data)
 	})
+	
+	router.POST("signup", func(ctx *gin.Context) {
+		name := ctx.PostForm("username")
+		email := ctx.PostForm("email")
+		password := ctx.PostForm("password")
+
+		addedUser := databaseCollection.FindOne(context.Background(), bson.M{"username": name})
+
+		if addedUser != nil {
+			ctx.AbortWithStatus(500)
+		}
+
+		addedEmail := databaseCollection.FindOne(context.Background(), bson.M{"email": email})
+
+		if addedEmail != nil {
+			ctx.AbortWithStatus(500)
+		}
+
+		var user Users
+		addedPassword := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+
+		if addedPassword != nil {
+			ctx.AbortWithStatus(500)
+		}
+
+		//ctx.JSON(200, gin.H{"Access": fmt.Sprintf("Hello %s ", name)})
+		ctx.HTML(http.StatusOK, "main.html", gin.H{
+			"Title":  "Hello there",
+			"Name":   name,
+			"Body":   "Welcome to the UNC Charlotte Blog Website.",
+			"Sample": "Students can ask their peers for any help or share any advice for their peers relating to matters such as classes, clubs, sports, or other extracurricular activities.",
+		})
+
+	})
 
 	router.Run(":" + host)
 }
@@ -115,6 +165,13 @@ type BlogPosts struct {
 	TitlePost   string `json:"title"`
 	ContentPost string `json:"contentpost"`
 	PostID      uuid.UUID
+}
+
+type Users struct {
+	ID       primitive.ObjectID `bson:_id`
+	Username string             `bson:"username"`
+	Email    string             `bson:"email"`
+	Password string             `bson:"password"`
 }
 
 // array to hold all posts
