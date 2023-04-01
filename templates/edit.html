@@ -1,15 +1,19 @@
+<!--edited by Aiden-->
+
 {{template "header"}}
-    <form>
+    <h1>Edit <i>{{.post.TitlePost}}</i> </h1>
+    <form action="/edit_post/{{.post.PostID}}" method="post">
         <div class="mb-3">
-            <label for="exampleFormControlInput1" class="form-label">Email address</label>
-            <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="name@example.com">
-          </div>
-          <div class="mb-3">
-            <label for="exampleFormControlTextarea1" class="form-label">Enter in your blog content:</label>
-            <textarea placeholder="Blog Content" required class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
-          </div>
-          <div class="mb-3">
-            <button type="submit" class="btn btn-dark mb-3"> Submit </button>
+          <label for="exampleFormControlInput1" class="form-label">New title:</label>
+          <input name="title" type="text" class="form-control" id="exampleFormControlInput1" value="{{.post.TitlePost}}" placeholder = "Title">
         </div>
+        <div class="mb-3">
+          <label for="exampleFormControlTextarea1" class="form-label">New blog content:</label>
+          <!-- For some stupid reason if I add a linebreak before the post content auto-fill, it actually adds the tabs to the post. Sorry for the long line-->
+          <textarea name="body" placeholder = "Body" required class="form-control" id="exampleFormControlTextarea1" rows="3">{{.post.ContentPost}}</textarea>
+        </div>
+        <div class="mb-3">
+          <button type="submit" class="btn btn-dark mb-3"> Submit </button>
+      </div>
     </form>
 {{template "footer"}}

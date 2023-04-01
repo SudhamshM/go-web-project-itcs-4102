@@ -150,6 +150,45 @@ func main() {
 
 	})
 
+
+	// (Aiden) editing a page:
+
+	router.GET("/edit/:id", func(ctx *gin.Context){
+		id := ctx.Param("id")
+		post := getPostById(id)
+		fmt.Println("finding post...")
+		if post == nil {
+			// if post is not there
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+			return
+		}
+
+		ctx.HTML(http.StatusOK, "edit.html", gin.H{
+			"post": post,
+		})
+	})
+
+	router.POST("/edit_post/:id",func(ctx *gin.Context){
+		title := ctx.PostForm("title")
+		body := ctx.PostForm("body")
+		id := ctx.Param("id")
+		post := getPostById(id)
+
+		fmt.Println("finding post...")
+		if post == nil {
+			// if post is not there
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+			return
+		}
+		post.TitlePost = title
+		post.ContentPost = body
+
+		// redirect them to the post they just edited
+		ctx.HTML(http.StatusOK, "post.html", gin.H{
+			"post": post,
+		})
+	})
+
 	router.Run(":" + host)
 }
 
