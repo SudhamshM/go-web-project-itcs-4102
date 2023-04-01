@@ -52,6 +52,8 @@ func main() {
 		})
 	})
 
+	// postCtrl := controllers.PostController{}
+	// router.GET("/undefined", postCtrl.GetPost)
 	router.GET("/posts", func(ctx *gin.Context) {
 		if len(bigArray) == 0 {
 			ctx.HTML(http.StatusOK, "posts.html", gin.H{
