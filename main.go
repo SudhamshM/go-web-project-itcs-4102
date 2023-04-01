@@ -116,7 +116,7 @@ func main() {
 		ctx.HTML(http.StatusOK, "signup.html", data)
 	})
 
-	router.POST("signup", func(ctx *gin.Context) {
+	router.POST("/signup", func(ctx *gin.Context) {
 		name := ctx.PostForm("username")
 		email := ctx.PostForm("email")
 		password := ctx.PostForm("password")
@@ -140,7 +140,6 @@ func main() {
 			ctx.AbortWithStatus(500)
 		}
 
-		//ctx.JSON(200, gin.H{"Access": fmt.Sprintf("Hello %s ", name)})
 		ctx.HTML(http.StatusOK, "main.html", gin.H{
 			"Title":  "Hello there",
 			"Name":   name,
@@ -150,10 +149,9 @@ func main() {
 
 	})
 
-
 	// (Aiden) editing a page:
 
-	router.GET("/edit/:id", func(ctx *gin.Context){
+	router.GET("/edit/:id", func(ctx *gin.Context) {
 		id := ctx.Param("id")
 		post := getPostById(id)
 		fmt.Println("finding post...")
@@ -168,7 +166,7 @@ func main() {
 		})
 	})
 
-	router.POST("/edit_post/:id",func(ctx *gin.Context){
+	router.POST("/edit/:id", func(ctx *gin.Context) {
 		title := ctx.PostForm("title")
 		body := ctx.PostForm("body")
 		id := ctx.Param("id")
