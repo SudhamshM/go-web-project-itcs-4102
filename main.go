@@ -123,20 +123,20 @@ func main() {
 
 		addedUser := databaseCollection.FindOne(context.Background(), bson.M{"username": name})
 
-		if addedUser != nil {
+		if addedUser == nil {
 			ctx.AbortWithStatus(500)
 		}
 
 		addedEmail := databaseCollection.FindOne(context.Background(), bson.M{"email": email})
 
-		if addedEmail != nil {
+		if addedEmail == nil {
 			ctx.AbortWithStatus(500)
 		}
 
 		var user Users
 		addedPassword := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 
-		if addedPassword != nil {
+		if addedPassword == nil {
 			ctx.AbortWithStatus(500)
 		}
 
