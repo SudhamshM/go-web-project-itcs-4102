@@ -1,11 +1,27 @@
 {{template "header"}}
-<p><strong>Title: </strong> {{.post.TitlePost}}</p>
-<p><strong>Author: </strong>{{.post.FirstName}}</p>
-<p><strong>Content: </strong>{{.post.ContentPost}}</p>
+<h1>{{.post.TitlePost}}</h1>
 
-<form action="/edit/{{.post.PostID}}" method="get">
-    <button type="submit" class="btn btn-primary">Edit</button>
-</form>
+<p class="text-secondary">Written by {{.post.FirstName}}</p>
 
-<button type="button" class="btn btn-danger">Delete</button>
+<p>{{.post.ContentPost}}</p>
+
+
+
+<div class="mb-3">
+    <form action="/edit/{{.post.PostID}}" method="get">
+        <button type="submit" class="btn btn-dark">Edit</button>
+    </form>
+</div>
+
+<div class="mb-3">
+    <!-- TODO implement delete functionality -->
+    <button type="button" class="btn btn-outline-danger">Delete</button>
+</div>
+
+
+
+
+
+
+
 {{template "footer"}}
