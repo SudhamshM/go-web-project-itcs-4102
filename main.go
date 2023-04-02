@@ -189,6 +189,14 @@ func main() {
 		})
 	})
 
+	router.NoRoute(func(ctx *gin.Context) {
+
+		ctx.HTML(http.StatusNotFound, "error.html", gin.H{
+			"code":    http.StatusNotFound,
+			"message": ctx.Request.URL.String() + " could not be found.",
+		})
+	})
+
 	router.Run(":" + host)
 }
 
