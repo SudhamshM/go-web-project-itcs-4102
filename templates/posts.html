@@ -4,7 +4,7 @@
     <h1>No posts here. Create them <a href="/newblog">here!</a></h1>
     {{end}}
     {{if .hasPosts}}
-    {{ range $index, $element := .bigArray }}
+      {{ range $element := .bigArray }}
         <div class="col-sm-3 pb-1">
           <div class="card shadow-sm">
             <div class="card-body">
@@ -15,6 +15,6 @@
           </div>
         </div>
       {{end}}
-      {{end}}
+    {{end}}
     </div>
 {{template "footer"}}
