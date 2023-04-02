@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"html/template"
+	"main/controllers"
 	"net/http"
 	"os"
-
-	"html/template"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -52,8 +52,8 @@ func main() {
 		})
 	})
 
-	// postCtrl := controllers.PostController{}
-	// router.GET("/undefined", postCtrl.GetPost)
+	postCtrl := controllers.PostController{}
+	router.GET("/undefined", postCtrl.GetPost)
 	router.GET("/posts", func(ctx *gin.Context) {
 		if len(bigArray) == 0 {
 			ctx.HTML(http.StatusOK, "posts.html", gin.H{
