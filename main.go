@@ -53,6 +53,7 @@ func main() {
 	})
 
 	postCtrl := controllers.PostController{}
+	// switch to controller defined routes for future
 	router.GET("/undefined", postCtrl.GetPost)
 	router.GET("/posts", func(ctx *gin.Context) {
 		if len(bigArray) == 0 {
