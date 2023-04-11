@@ -208,7 +208,7 @@ func main() {
 		bigArray = nonsense
 
 		// redirect them to the post they just edited
-		ctx.Redirect(200, "/posts")
+		ctx.Redirect(302, "/posts")
 
 	})
 
