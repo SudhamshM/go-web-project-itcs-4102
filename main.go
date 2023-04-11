@@ -193,20 +193,24 @@ func main() {
 	//incomplete delete post method
 	//need to loop through the posts and derive the needed index
 	//delete the index from the bigarray
-	router.POST("/posts", func(ctx *gin.Context) {
-		// id := ctx.Param("id")
+	router.POST("/delete/:id", func(ctx *gin.Context) {
+		id := ctx.Param("id")
+		var nonsense []BlogPosts
 
-		// //loop through each value in bigArray
-		// for i, v := range bigArray {
-		// 	//compare the postID to the given postID
-		// }
+		//loop through each value in bigArray
+		for _, v := range bigArray {
+			//compare the postID to the given postID
+			if v.PostID.String() == id {
+
+			} else {
+				nonsense = append(nonsense, v)
+			}
+		}
+		bigArray = nonsense
 
 		// redirect them to the post they just edited
-		ctx.HTML(http.StatusOK, "posts.html", gin.H{
-			"error":    false,
-			"bigArray": bigArray,
-			"hasPosts": true,
-		})
+		ctx.Redirect(302, "/posts")
+
 	})
 
 	router.NoRoute(func(ctx *gin.Context) {
