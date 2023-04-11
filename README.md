@@ -1,5 +1,5 @@
 # Go Web Project
-A simple web application built using the Go programming language in our ITCS 4102 class.
+A simple web application built using the Go programming language in our ITCS 4102/5102 class.
 
 ## Run
 1. First make sure to navigate to the "sample" directory in order to execute the next commands. 
