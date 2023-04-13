@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"html/template"
+	"log"
 	"main/controllers"
 	"net/http"
 	"os"
@@ -15,7 +16,38 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/bcrypt"
+
+	"time"
+
+	"github.com/joho/godotenv"
 )
+
+var client *mongo.Client
+
+func init() {
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		fmt.Println("Error loading .env file")
+	}
+
+	clientOptions := options.Client().
+		ApplyURI(os.Getenv("DB_URL"))
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	var err2 error
+	client, err2 = mongo.Connect(ctx, clientOptions)
+	if err2 != nil {
+		log.Fatal(err)
+	}
+	user1 := Users{
+		ID: primitive.NewObjectID(), Username: "Melvin Sudhamsh", Email: "b@a.com", Password: "good",
+	}
+	_, err3 := client.Database("goDatabase").Collection("users").InsertOne(ctx, user1)
+	if err3 != nil {
+		fmt.Println(err3)
+	}
+}
 
 func main() {
 	var databaseCollection *mongo.Collection
