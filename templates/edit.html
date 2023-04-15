@@ -16,4 +16,10 @@
           <button type="submit" class="btn btn-dark mb-3"> Submit </button>
       </div>
     </form>
+    <form action="/posts/{{.post.PostID}}" method="get">
+      <div class="mb-3">
+        <button type="submit" class="btn btn-dark mb-3"> Cancel </button>
+    </div>
+  </form>
+
 {{template "footer"}}
