@@ -143,6 +143,14 @@ func main() {
 		ctx.HTML(http.StatusOK, "contact.html", data)
 	})
 
+	router.GET("/login", func(ctx *gin.Context) {
+		data := Page{
+			Title: "Login",
+			Body:  "Welcome to the login page",
+		}
+		ctx.HTML(http.StatusOK, "signup.html", data)
+	})
+
 	router.GET("/signup", func(ctx *gin.Context) {
 		data := Page{
 			Title: "Sign Up",
