@@ -19,6 +19,8 @@ import (
 
 	"time"
 
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/joho/godotenv"
 )
 
@@ -60,6 +62,10 @@ func main() {
 	router.SetHTMLTemplate(t)
 	router.Static("/public/", "./public/")
 	router.SetTrustedProxies(nil)
+
+	store := cookie.NewStore([]byte(os.Getenv("SECRET_KEY")))
+	store.Options(sessions.Options{MaxAge: 60 * 60 * 24}) // expire in 24 hours
+	router.Use(sessions.Sessions("mysession", store))
 
 	// route handlers
 	router.GET("/", func(ctx *gin.Context) {
@@ -151,6 +157,14 @@ func main() {
 		email := ctx.PostForm("email")
 		password := ctx.PostForm("password")
 
+		// check if user is already signed up and logged in with session cookie
+		session := sessions.Default(ctx)
+		if userSess := session.Get("session"); userSess != nil {
+			session.AddFlash("errors", "You are already signed up and logged in.")
+			ctx.Redirect(302, "/")
+			return
+		}
+
 		result := Users{}
 		usersCollection.FindOne(ctx, bson.M{"email": email}).Decode(&result)
 		// check if user doesn't exist in db already
@@ -179,7 +193,8 @@ func main() {
 			fmt.Println(err3)
 			return
 		}
-
+		session.Set("session", user1.ID.String())
+		session.Save()
 		ctx.HTML(http.StatusOK, "main.html", gin.H{
 			"Title":  "Hello there",
 			"Name":   name,
