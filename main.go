@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -22,6 +23,7 @@ import (
 )
 
 var client *mongo.Client
+var usersCollection *mongo.Collection
 
 func init() {
 	err := godotenv.Load(".env")
@@ -39,6 +41,8 @@ func init() {
 	if err2 != nil {
 		log.Fatal(err)
 	}
+	usersCollection = client.Database("goDatabase").Collection("users")
+
 }
 
 func main() {
@@ -134,17 +138,32 @@ func main() {
 	})
 
 	router.GET("/signup", func(ctx *gin.Context) {
-		data := Page{
-			Title: "Sign Up",
-			Body:  "Welcome to the sign up page",
-		}
-		ctx.HTML(http.StatusOK, "signup.html", data)
+		ctx.HTML(http.StatusOK, "signup.html", gin.H{
+			"Title":        "Sign Up",
+			"Body":         "Welcome to the sign up page",
+			"error":        nil,
+			"errorMessage": nil,
+		})
 	})
 
 	router.POST("/signup", func(ctx *gin.Context) {
 		name := ctx.PostForm("username")
 		email := ctx.PostForm("email")
 		password := ctx.PostForm("password")
+
+		result := Users{}
+		usersCollection.FindOne(ctx, bson.M{"username": name}).Decode(&result)
+		// check if user doesn't exist in db already
+		if result.ID != primitive.NilObjectID || result.Email == email {
+			ctx.HTML(http.StatusBadRequest, "signup.html", gin.H{
+				"Title":        "Sign Up",
+				"Body":         "Welcome to the sign up page",
+				"error":        true,
+				"errorMessage": "Username or email already in use.",
+			})
+			return
+		}
+
 		hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
 		if err != nil {
@@ -155,7 +174,7 @@ func main() {
 		user1 := Users{
 			ID: primitive.NewObjectID(), Username: name, Email: email, Password: string(hash[:]),
 		}
-		_, err3 := client.Database("goDatabase").Collection("users").InsertOne(ctx, user1)
+		_, err3 := usersCollection.InsertOne(ctx, user1)
 		if err3 != nil {
 			fmt.Println(err3)
 			return
