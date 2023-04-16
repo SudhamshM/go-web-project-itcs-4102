@@ -11,7 +11,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -40,26 +39,9 @@ func init() {
 	if err2 != nil {
 		log.Fatal(err)
 	}
-	user1 := Users{
-		ID: primitive.NewObjectID(), Username: "Melvin Sudhamsh", Email: "b@a.com", Password: "good",
-	}
-	_, err3 := client.Database("goDatabase").Collection("users").InsertOne(ctx, user1)
-	if err3 != nil {
-		fmt.Println(err3)
-	}
 }
 
 func main() {
-	var databaseCollection *mongo.Collection
-	ctx := context.TODO()
-	options := options.Client().ApplyURI("mongodb://localhost:27017")
-	client, err := mongo.Connect(ctx, options)
-
-	if err != nil {
-		panic(err)
-	}
-
-	databaseCollection = client.Database("goDatabase").Collection("users")
 
 	// getting port env variable for render
 	var host = os.Getenv("PORT")
@@ -163,24 +145,20 @@ func main() {
 		name := ctx.PostForm("username")
 		email := ctx.PostForm("email")
 		password := ctx.PostForm("password")
+		hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
-		addedUser := databaseCollection.FindOne(context.Background(), bson.M{"username": name})
-
-		if addedUser == nil {
-			ctx.AbortWithStatus(500)
+		if err != nil {
+			fmt.Println(err)
+			return
 		}
 
-		addedEmail := databaseCollection.FindOne(context.Background(), bson.M{"email": email})
-
-		if addedEmail == nil {
-			ctx.AbortWithStatus(500)
+		user1 := Users{
+			ID: primitive.NewObjectID(), Username: name, Email: email, Password: string(hash[:]),
 		}
-
-		var user Users
-		addedPassword := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-
-		if addedPassword == nil {
-			ctx.AbortWithStatus(500)
+		_, err3 := client.Database("goDatabase").Collection("users").InsertOne(ctx, user1)
+		if err3 != nil {
+			fmt.Println(err3)
+			return
 		}
 
 		ctx.HTML(http.StatusOK, "main.html", gin.H{
@@ -189,6 +167,32 @@ func main() {
 			"Body":   "Welcome to the UNC Charlotte Blog Website.",
 			"Sample": "Students can ask their peers for any help or share any advice for their peers relating to matters such as classes, clubs, sports, or other extracurricular activities.",
 		})
+
+		// addedUser := databaseCollection.FindOne(context.Background(), bson.M{"username": name})
+
+		// if addedUser == nil {
+		// 	ctx.AbortWithStatus(500)
+		// }
+
+		// addedEmail := databaseCollection.FindOne(context.Background(), bson.M{"email": email})
+
+		// if addedEmail == nil {
+		// 	ctx.AbortWithStatus(500)
+		// }
+
+		// var user Users
+		// addedPassword := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+
+		// if addedPassword == nil {
+		// 	ctx.AbortWithStatus(500)
+		// }
+
+		// ctx.HTML(http.StatusOK, "main.html", gin.H{
+		// 	"Title":  "Hello there",
+		// 	"Name":   name,
+		// 	"Body":   "Welcome to the UNC Charlotte Blog Website.",
+		// 	"Sample": "Students can ask their peers for any help or share any advice for their peers relating to matters such as classes, clubs, sports, or other extracurricular activities.",
+		// })
 
 	})
 
