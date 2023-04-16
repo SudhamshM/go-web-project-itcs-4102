@@ -26,6 +26,7 @@ import (
 
 var client *mongo.Client
 var usersCollection *mongo.Collection
+var store cookie.Store
 
 func init() {
 	err := godotenv.Load(".env")
@@ -45,6 +46,9 @@ func init() {
 	}
 	usersCollection = client.Database("goDatabase").Collection("users")
 
+	store = cookie.NewStore([]byte(os.Getenv("SECRET_KEY")))
+	store.Options(sessions.Options{MaxAge: 60 * 60 * 24, HttpOnly: true}) // expire in 24 hours and disable cookie access from js
+
 }
 
 func main() {
@@ -62,10 +66,14 @@ func main() {
 	router.SetHTMLTemplate(t)
 	router.Static("/public/", "./public/")
 	router.SetTrustedProxies(nil)
-
-	store := cookie.NewStore([]byte(os.Getenv("SECRET_KEY")))
-	store.Options(sessions.Options{MaxAge: 60 * 60 * 24}) // expire in 24 hours
 	router.Use(sessions.Sessions("mysession", store))
+
+	router.Use(func(ctx *gin.Context) {
+		sess, _ := store.Get(ctx.Request, "mysession")
+		sess.Values["user"] = "wohwggw"
+		sess.Save(ctx.Request, ctx.Writer)
+		fmt.Println("session: ", sess.Values)
+	})
 
 	// route handlers
 	router.GET("/", func(ctx *gin.Context) {
@@ -143,6 +151,26 @@ func main() {
 		ctx.HTML(http.StatusOK, "login.html", data)
 	})
 
+	router.POST("/login", func(ctx *gin.Context) {
+		email := ctx.PostForm("email")
+		password := ctx.PostForm("password")
+
+		user := getUserByEmail(ctx, email)
+
+		if user == nil {
+			fmt.Println("user not found with email")
+		} else {
+			fmt.Println("user found")
+			fmt.Println(user)
+			pwdCheck := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+			if pwdCheck == nil {
+				fmt.Println("login success")
+			} else {
+				fmt.Println("wrong password", pwdCheck)
+			}
+		}
+	})
+
 	router.GET("/signup", func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "signup.html", gin.H{
 			"Title":        "Sign Up",
@@ -159,6 +187,7 @@ func main() {
 
 		// check if user is already signed up and logged in with session cookie
 		session := sessions.Default(ctx)
+
 		if userSess := session.Get("session"); userSess != nil {
 			session.AddFlash("errors", "You are already signed up and logged in.")
 			ctx.Redirect(302, "/")
@@ -351,4 +380,13 @@ func getPostById(id string) *BlogPosts {
 		}
 	}
 	return nil
+}
+
+func getUserByEmail(ctx *gin.Context, email string) *Users {
+	var result = Users{}
+	usersCollection.FindOne(ctx, bson.M{"email": email}).Decode(&result)
+	if result.ID == primitive.NilObjectID {
+		return nil
+	}
+	return &result
 }
