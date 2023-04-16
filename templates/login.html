@@ -2,18 +2,18 @@
     <h1>{{.Title}}</h1>
     <p>{{.Body}}</p>
 <div class="container">
-    <form>
+    <form action="/login" method="post">
             <div class="mb-3">
-                    <label for="exampleFormControlInput1" class="form-label">Email address</label>
-                    <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="name@example.com">
+                    <label for="email" class="form-label">Email address</label>
+                    <input type="email" name="email" class="form-control" id="email" placeholder="name@example.com">
             </div>
             <div class="mb-3">
-                    <label for="exampleFormControlTextarea1" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="exampleFormControlTextarea1" placeholder="Password here">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" id="password" placeholder="Password here">
             </div>
            
             <div class="mb-3">
-                    <button type="submit" class="btn btn-dark mb-3"> Log In </button>
+                    <button type="submit" class="btn btn-dark mb-3">Log In</button>
             </div>
     </form>
 </div>
