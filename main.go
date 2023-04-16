@@ -134,7 +134,7 @@ func main() {
 			Title: "Login",
 			Body:  "Welcome to the login page",
 		}
-		ctx.HTML(http.StatusOK, "signup.html", data)
+		ctx.HTML(http.StatusOK, "login.html", data)
 	})
 
 	router.GET("/signup", func(ctx *gin.Context) {
@@ -152,7 +152,7 @@ func main() {
 		password := ctx.PostForm("password")
 
 		result := Users{}
-		usersCollection.FindOne(ctx, bson.M{"username": name}).Decode(&result)
+		usersCollection.FindOne(ctx, bson.M{"email": email}).Decode(&result)
 		// check if user doesn't exist in db already
 		if result.ID != primitive.NilObjectID || result.Email == email {
 			ctx.HTML(http.StatusBadRequest, "signup.html", gin.H{
@@ -303,7 +303,7 @@ type BlogPosts struct {
 }
 
 type Users struct {
-	ID       primitive.ObjectID `bson:_id`
+	ID       primitive.ObjectID `bson:"_id"`
 	Username string             `bson:"username"`
 	Email    string             `bson:"email"`
 	Password string             `bson:"password"`
