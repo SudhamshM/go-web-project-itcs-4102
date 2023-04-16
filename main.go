@@ -51,13 +51,13 @@ func init() {
 
 func main() {
 	var databaseCollection *mongo.Collection
-	ctx := context.TODO()
-	options := options.Client().ApplyURI("mongodb://localhost:27017")
-	client, err := mongo.Connect(ctx, options)
+	// ctx := context.TODO()
+	// options := options.Client().ApplyURI("mongodb://localhost:27017")
+	// client, err := mongo.Connect(ctx, options)
 
-	if err != nil {
-		panic(err)
-	}
+	// if err != nil {
+	// panic(err)
+	// }
 
 	databaseCollection = client.Database("goDatabase").Collection("users")
 
