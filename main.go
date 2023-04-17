@@ -100,6 +100,8 @@ func main() {
 		// clearing the flash before rendering
 		sessions.Default(ctx).Flashes()
 		sessions.Default(ctx).Save()
+		// either object id string or nil
+		val := sessions.Default(ctx).Get("user")
 
 		ctx.HTML(http.StatusOK, "main.html", gin.H{
 			"Title":       "Hello there",
@@ -107,6 +109,7 @@ func main() {
 			"Sample":      "Students can ask their peers for any help or share any advice for their peers relating to matters such as classes, clubs, sports, or other extracurricular activities.",
 			"successMsgs": success,
 			"errorMsgs":   errMsgs,
+			"user":        val,
 		})
 	})
 
@@ -231,7 +234,7 @@ func main() {
 
 		// to use above logic, update auth middleware to check for nil instead of ok
 		sessions.Default(ctx).Clear()
-		sessions.Default(ctx).AddFlash("You have successfully logged out", "success")
+		sessions.Default(ctx).AddFlash("You have successfully logged out!", "success")
 		sessions.Default(ctx).Save()
 		fmt.Println("logged out")
 		ctx.Redirect(302, "/")
