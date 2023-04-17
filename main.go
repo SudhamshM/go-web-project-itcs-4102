@@ -94,10 +94,19 @@ func main() {
 
 	// route handlers
 	router.GET("/", func(ctx *gin.Context) {
+		success := sessions.Default(ctx).Flashes("success")
+		errMsgs := sessions.Default(ctx).Flashes("error")
+
+		// clearing the flash before rendering
+		sessions.Default(ctx).Flashes()
+		sessions.Default(ctx).Save()
+
 		ctx.HTML(http.StatusOK, "main.html", gin.H{
-			"Title":  "Hello there",
-			"Body":   "Welcome to the UNC Charlotte Blog Website.",
-			"Sample": "Students can ask their peers for any help or share any advice for their peers relating to matters such as classes, clubs, sports, or other extracurricular activities.",
+			"Title":       "Hello there",
+			"Body":        "Welcome to the UNC Charlotte Blog Website.",
+			"Sample":      "Students can ask their peers for any help or share any advice for their peers relating to matters such as classes, clubs, sports, or other extracurricular activities.",
+			"successMsgs": success,
+			"errorMsgs":   errMsgs,
 		})
 	})
 
@@ -192,14 +201,7 @@ func main() {
 				sess.Values["user"] = user.ID.String()
 				sess.AddFlash("You have successfully logged in!", "success")
 				sess.Save(ctx.Request, ctx.Writer)
-
-				ctx.HTML(http.StatusOK, "main.html", gin.H{
-					"Title":       "Hello there",
-					"Name":        user.Username,
-					"Body":        "Welcome to the UNC Charlotte Blog Website.",
-					"Sample":      "Students can ask their peers for any help or share any advice for their peers relating to matters such as classes, clubs, sports, or other extracurricular activities.",
-					"successMsgs": sess.Flashes("success"),
-				})
+				ctx.Redirect(302, "/")
 				return
 			} else {
 				fmt.Println("wrong password", pwdCheck)
@@ -227,6 +229,7 @@ func main() {
 
 		// to use above logic, update auth middleware to check for nil instead of ok
 		sessions.Default(ctx).Clear()
+		sessions.Default(ctx).AddFlash("You have successfully logged out", "success")
 		sessions.Default(ctx).Save()
 		fmt.Println("logged out")
 		ctx.Redirect(302, "/")
@@ -237,15 +240,17 @@ func main() {
 		email := ctx.PostForm("email")
 		password := ctx.PostForm("password")
 
+		var currentSess sessions.Session = sessions.Default(ctx)
+
 		result := Users{}
 		usersCollection.FindOne(ctx, bson.M{"email": email}).Decode(&result)
 		// check if user doesn't exist in db already
-		if result.ID != primitive.NilObjectID || result.Email == email {
+		if result.Email == email {
 			ctx.HTML(http.StatusBadRequest, "signup.html", gin.H{
 				"Title":        "Sign Up",
 				"Body":         "Welcome to the sign up page",
 				"error":        true,
-				"errorMessage": "Username or email already in use.",
+				"errorMessage": "Email already in use.",
 			})
 			return
 		}
@@ -265,39 +270,19 @@ func main() {
 			fmt.Println(err3)
 			return
 		}
+		// showing success flash message
+
+		currentSess.AddFlash("Account successfully created", "success")
+		ok := currentSess.Flashes("success")
+		currentSess.Flashes()
+		currentSess.Save()
 		ctx.HTML(http.StatusOK, "main.html", gin.H{
-			"Title":  "Hello there",
-			"Name":   name,
-			"Body":   "Welcome to the UNC Charlotte Blog Website.",
-			"Sample": "Students can ask their peers for any help or share any advice for their peers relating to matters such as classes, clubs, sports, or other extracurricular activities.",
+			"Title":       "Hello there",
+			"Name":        name,
+			"Body":        "Welcome to the UNC Charlotte Blog Website.",
+			"Sample":      "Students can ask their peers for any help or share any advice for their peers relating to matters such as classes, clubs, sports, or other extracurricular activities.",
+			"successMsgs": ok,
 		})
-
-		// addedUser := databaseCollection.FindOne(context.Background(), bson.M{"username": name})
-
-		// if addedUser == nil {
-		// 	ctx.AbortWithStatus(500)
-		// }
-
-		// addedEmail := databaseCollection.FindOne(context.Background(), bson.M{"email": email})
-
-		// if addedEmail == nil {
-		// 	ctx.AbortWithStatus(500)
-		// }
-
-		// var user Users
-		// addedPassword := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-
-		// if addedPassword == nil {
-		// 	ctx.AbortWithStatus(500)
-		// }
-
-		// ctx.HTML(http.StatusOK, "main.html", gin.H{
-		// 	"Title":  "Hello there",
-		// 	"Name":   name,
-		// 	"Body":   "Welcome to the UNC Charlotte Blog Website.",
-		// 	"Sample": "Students can ask their peers for any help or share any advice for their peers relating to matters such as classes, clubs, sports, or other extracurricular activities.",
-		// })
-
 	})
 
 	// (Aiden) editing a page:

@@ -3,7 +3,13 @@
 <div class="m-2 alert alert-success alert-dismissible fade show" role="alert">
         {{.}}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
+</div>
+{{end}}
+{{range .errorMsgs}}
+<div class="m-2 alert alert-danger alert-dismissible fade show" role="alert">
+        {{.}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
 {{end}}
         <h1>{{.Title}}</h1>
         <h2>{{.Name}}</h2>
