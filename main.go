@@ -131,11 +131,13 @@ func main() {
 
 	router.GET("/posts/:id", singlePost)
 
-	router.GET("/newblog", func(ctx *gin.Context) {
-		ctx.HTML(http.StatusOK, "newblog.html", nil)
+	router.GET("/posts/new", func(ctx *gin.Context) {
+		ctx.HTML(http.StatusOK, "newblog.html", gin.H{
+			"Title": "Create A Post",
+		})
 	})
 
-	router.POST("/newblog", func(ctx *gin.Context) {
+	router.POST("/posts", func(ctx *gin.Context) {
 		var r = ctx.Request
 		var newBlog BlogPosts = BlogPosts{
 			FirstName:   r.FormValue("firstName"),

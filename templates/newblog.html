@@ -1,5 +1,6 @@
 {{template "header"}}
-    <form action="/newblog" method="post">
+<h1>{{.Title}}</h1>
+    <form action="/posts" method="post">
         <div class="mb-3">
             <label for="exampleFormControlInput1" class="form-label">Enter Your First Name</label>
             <input type="text" class="form-control" id="firstName" name="firstName" placeholder="First Name">

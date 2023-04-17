@@ -1,7 +1,7 @@
 {{template "header"}}
 <div class="row mt-1">
     {{if .error}}
-    <h1>No posts here. Create them <a href="/newblog">here!</a></h1>
+    <h1>No posts here. Create them <a href="/posts/new">here!</a></h1>
     {{end}}
     {{if .hasPosts}}
       {{ range $element := .bigArray }}
