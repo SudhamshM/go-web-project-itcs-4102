@@ -27,6 +27,7 @@ import (
 var client *mongo.Client
 var usersCollection *mongo.Collection
 var store cookie.Store
+var router *gin.Engine
 
 func init() {
 	err := godotenv.Load(".env")
@@ -62,17 +63,33 @@ func main() {
 	// setting router & template for requests and static folders/files
 	t := template.Must(template.ParseGlob("templates/*.html"))
 	template.Must(t.ParseGlob("templates/partials/*.html"))
-	router := gin.Default()
+	router = gin.Default()
 	router.SetHTMLTemplate(t)
 	router.Static("/public/", "./public/")
 	router.SetTrustedProxies(nil)
 	router.Use(sessions.Sessions("mysession", store))
 
 	router.Use(func(ctx *gin.Context) {
+		if ctx.Request.URL.String() != "/logout" {
+			ctx.Next()
+			return
+		}
+		fmt.Println("auth middleware on")
 		sess, _ := store.Get(ctx.Request, "mysession")
-		sess.Values["user"] = "wohwggw"
-		sess.Save(ctx.Request, ctx.Writer)
-		fmt.Println("session: ", sess.Values)
+		val, ok := sess.Values["user"]
+		if !ok {
+			fmt.Println("not logged in to perfom action")
+			ctx.HTML(http.StatusUnauthorized, "error.html", gin.H{
+				"code":    401,
+				"message": "Not authorized to perform logout",
+			})
+			ctx.Abort()
+			return
+		}
+		fmt.Println(val)
+		fmt.Println("user authorized")
+		fmt.Println("middleware off")
+		ctx.Next()
 	})
 
 	// route handlers
@@ -159,14 +176,36 @@ func main() {
 
 		if user == nil {
 			fmt.Println("user not found with email")
+			ctx.HTML(http.StatusOK, "error.html", gin.H{
+				"code":    404,
+				"message": "User not found with given email",
+			})
+			return
 		} else {
 			fmt.Println("user found")
 			fmt.Println(user)
 			pwdCheck := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 			if pwdCheck == nil {
 				fmt.Println("login success")
+				// store user id in session
+				sess, _ := store.Get(ctx.Request, "mysession")
+				sess.Values["user"] = user.ID.String()
+				sess.Save(ctx.Request, ctx.Writer)
+
+				ctx.HTML(http.StatusOK, "main.html", gin.H{
+					"Title":  "Hello there",
+					"Name":   user.Username,
+					"Body":   "Welcome to the UNC Charlotte Blog Website.",
+					"Sample": "Students can ask their peers for any help or share any advice for their peers relating to matters such as classes, clubs, sports, or other extracurricular activities.",
+				})
+				return
 			} else {
 				fmt.Println("wrong password", pwdCheck)
+				ctx.HTML(http.StatusOK, "error.html", gin.H{
+					"code":    401,
+					"message": "Incorrect password",
+				})
+				return
 			}
 		}
 	})
@@ -180,19 +219,20 @@ func main() {
 		})
 	})
 
+	router.GET("/logout", func(ctx *gin.Context) {
+		// sess, _ := store.Get(ctx.Request, "mysession")
+		// sess.Values["user"] = nil
+
+		// to use above logic, update auth middleware to check for nil instead of ok
+		sessions.Default(ctx).Clear()
+		sessions.Default(ctx).Save()
+		ctx.Redirect(302, "/")
+	})
+
 	router.POST("/signup", func(ctx *gin.Context) {
 		name := ctx.PostForm("username")
 		email := ctx.PostForm("email")
 		password := ctx.PostForm("password")
-
-		// check if user is already signed up and logged in with session cookie
-		session := sessions.Default(ctx)
-
-		if userSess := session.Get("session"); userSess != nil {
-			session.AddFlash("errors", "You are already signed up and logged in.")
-			ctx.Redirect(302, "/")
-			return
-		}
 
 		result := Users{}
 		usersCollection.FindOne(ctx, bson.M{"email": email}).Decode(&result)
@@ -222,8 +262,6 @@ func main() {
 			fmt.Println(err3)
 			return
 		}
-		session.Set("session", user1.ID.String())
-		session.Save()
 		ctx.HTML(http.StatusOK, "main.html", gin.H{
 			"Title":  "Hello there",
 			"Name":   name,
