@@ -6,6 +6,8 @@ import (
 	"html/template"
 	"log"
 	"main/controllers"
+
+	//"main/models"
 	"net/http"
 	"os"
 
@@ -28,6 +30,9 @@ var client *mongo.Client
 var usersCollection *mongo.Collection
 var store cookie.Store
 var router *gin.Engine
+
+// controllers
+var postCtrl controllers.PostController
 
 func init() {
 	err := godotenv.Load(".env")
@@ -113,9 +118,9 @@ func main() {
 		})
 	})
 
-	postCtrl := controllers.PostController{}
+	postCtrl = controllers.PostController{}
 	// switch to controller defined routes for future
-	router.GET("/undefined", postCtrl.GetPost)
+	router.GET("/undefined", postCtrl.CreatePost)
 	router.GET("/posts", func(ctx *gin.Context) {
 		if len(bigArray) == 0 {
 			ctx.HTML(http.StatusOK, "posts.html", gin.H{
@@ -155,6 +160,20 @@ func main() {
 			"hasPosts": true,
 		})
 	})
+
+	/**
+	postsCollection = client.Database("goDatabase").Collection("posts")
+	newPost := models.Post{
+		Name:    "John Wick",
+		Title:   "",
+		Content: "Go watch movie!",
+		ID:      primitive.NewObjectID(),
+	}
+	_, insErr := postsCollection.InsertOne(c, newPost)
+	if insErr != nil {
+		panic(insErr)
+	}
+	*/
 
 	router.GET("/about", func(ctx *gin.Context) {
 		data := Page{
@@ -266,10 +285,10 @@ func main() {
 			fmt.Println(err)
 			return
 		}
-
 		user1 := Users{
 			ID: primitive.NewObjectID(), Username: name, Email: email, Password: string(hash[:]),
 		}
+
 		_, err3 := usersCollection.InsertOne(ctx, user1)
 		if err3 != nil {
 			fmt.Println(err3)
