@@ -190,13 +190,15 @@ func main() {
 				// store user id in session
 				sess, _ := store.Get(ctx.Request, "mysession")
 				sess.Values["user"] = user.ID.String()
+				sess.AddFlash("You have successfully logged in!", "success")
 				sess.Save(ctx.Request, ctx.Writer)
 
 				ctx.HTML(http.StatusOK, "main.html", gin.H{
-					"Title":  "Hello there",
-					"Name":   user.Username,
-					"Body":   "Welcome to the UNC Charlotte Blog Website.",
-					"Sample": "Students can ask their peers for any help or share any advice for their peers relating to matters such as classes, clubs, sports, or other extracurricular activities.",
+					"Title":       "Hello there",
+					"Name":        user.Username,
+					"Body":        "Welcome to the UNC Charlotte Blog Website.",
+					"Sample":      "Students can ask their peers for any help or share any advice for their peers relating to matters such as classes, clubs, sports, or other extracurricular activities.",
+					"successMsgs": sess.Flashes("success"),
 				})
 				return
 			} else {
@@ -226,6 +228,7 @@ func main() {
 		// to use above logic, update auth middleware to check for nil instead of ok
 		sessions.Default(ctx).Clear()
 		sessions.Default(ctx).Save()
+		fmt.Println("logged out")
 		ctx.Redirect(302, "/")
 	})
 
