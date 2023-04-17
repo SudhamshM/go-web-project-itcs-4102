@@ -2,15 +2,14 @@
     https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_about_page
  -->
 {{template "header"}}
-    <h1> </h1>
-    <p></p>
     <html>
         <head>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <style>
-        body {
+        .about-body {
           font-family: Arial, Helvetica, sans-serif;
           margin: 0;
+	  padding-bottom: 100px;
         }
         
         html {
@@ -38,6 +37,7 @@
           text-align: center;
           background-color: #474e5d;
           color: white;
+	  margin-bottom: 25px;
         }
         
         .container {
@@ -64,6 +64,7 @@
           text-align: center;
           cursor: pointer;
           width: 100%;
+	  text-decoration: none;
         }
         
         .button:hover {
@@ -78,14 +79,14 @@
         }
         </style>
         </head>
-        <body>
-        
+        <div class="about-body">    
         <div class="about-section">
-          <h1>About Us Page</h1>
+          <h1>About Us</h1>
           <p>We are a group of students taking a 5102, and decided to create a forum website!</p>
         </div>
         
         <h2 style="text-align:center">Our Team</h2>
+	
         <div class="row">
           <div class="column">
             <div class="card">
@@ -95,7 +96,7 @@
                 <p class="title">Graduate Student</p>
                 <p>I always look forward to create new applications!</p>
                 <p>bpatel75@uncc.edu</p>
-                <p><button class="button">Contact</button></p>
+                <p><a href="https://www.github.com/bpatel75" target="_blank" class="button">Github</a></p>
               </div>
             </div>
           </div>
@@ -108,7 +109,7 @@
                 <p class="title">Undergraduate Student</p>
                 <p>Aspiring software engineer that loves to work with teams!</p>
                 <p>smondra1@uncc.edu</p>
-                <p><button class="button">Contact</button></p>
+                <p><a href="https://www.github.com/SudhamshM" target="_blank" class="button">Github</a></p>
               </div>
             </div>
           </div>
@@ -121,7 +122,7 @@
                 <p class="title">Early Entry Undergraduate Student</p>
                 <p>I always look forward to improve on my skills!</p>
                 <p>mpriyems@uncc.edu</p>
-                <p><button class="button">Contact</button></p>
+                <p><a href="https://www.github.com/Melvin-Priyemskiy" target="_blank" class="button">Github</a></p>
               </div>
             </div>
           </div>
@@ -134,7 +135,7 @@
                 <p class="title">Early Entry Undergraduate Student</p>
                 <p>My favorite stack is MERN!</p>
                 <p>ashanka6@uncc.edu</p>
-                <p><button class="button">Contact</button></p>
+                <p><a href="https://www.github.com/Ajays2023" target="_blank" class="button">Github</a></p>
               </div>
             </div>
           </div>
@@ -145,13 +146,14 @@
               <div class="container">
                 <h2>Aiden James</h2>
                 <p class="title">Early Entry Undergraduate Student</p>
-                <p>I am an aspiring game developer!</p>
+                <p>I am a hobbyist game developer!</p>
                 <p>ajames61@uncc.edu</p>
-                <p><button class="button">Contact</button></p>
+                <p><a href="https://www.github.com/bubbybumble" target="_blank" class="button">Github</a></p>
               </div>
         </div>
         
-        </body>
+        </div>
+        </div>
         </html>
         
 {{template "footer"}}
