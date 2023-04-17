@@ -1,5 +1,158 @@
+<!-- reference code for creating about page:
+    https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_about_page
+ -->
 {{template "header"}}
     <h1>{{.Title}}</h1>
     <p>{{.Body}}</p>
     <p>Written by {{.Sample}}</p>
+    <html>
+        <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+        body {
+          font-family: Arial, Helvetica, sans-serif;
+          margin: 0;
+        }
+        
+        html {
+          box-sizing: border-box;
+        }
+        
+        *, *:before, *:after {
+          box-sizing: inherit;
+        }
+        
+        .column {
+          float: left;
+          width: 33.3%;
+          margin-bottom: 16px;
+          padding: 0 8px;
+        }
+        
+        .card {
+          box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+          margin: 8px;
+        }
+        
+        .about-section {
+          padding: 50px;
+          text-align: center;
+          background-color: #474e5d;
+          color: white;
+        }
+        
+        .container {
+          padding: 0 16px;
+        }
+        
+        .container::after, .row::after {
+          content: "";
+          clear: both;
+          display: table;
+        }
+        
+        .title {
+          color: grey;
+        }
+        
+        .button {
+          border: none;
+          outline: 0;
+          display: inline-block;
+          padding: 8px;
+          color: white;
+          background-color: #000;
+          text-align: center;
+          cursor: pointer;
+          width: 100%;
+        }
+        
+        .button:hover {
+          background-color: #555;
+        }
+        
+        @media screen and (max-width: 650px) {
+          .column {
+            width: 100%;
+            display: block;
+          }
+        }
+        </style>
+        </head>
+        <body>
+        
+        <div class="about-section">
+          <h1>About Us Page</h1>
+          <p>We are a group of students taking a 5102, and decided to create a forum website!</p>
+        </div>
+        
+        <h2 style="text-align:center">Our Team</h2>
+        <div class="row">
+          <div class="column">
+            <div class="card">
+              <img src="https://avatars.githubusercontent.com/u/71344442?v=4" alt="Brijesh" style="width:100%">
+              <div class="container">
+                <h2>Brijesh Patel</h2>
+                <p class="title">Graduate Student</p>
+                <p>I always look forward to create new applications!</p>
+                <p>bpatel75@uncc.edu</p>
+                <p><button class="button">Contact</button></p>
+              </div>
+            </div>
+          </div>
+        
+          <div class="column">
+            <div class="card">
+              <img src="https://media.licdn.com/dms/image/C4E03AQHfoRtLT3sV2g/profile-displayphoto-shrink_800_800/0/1627084042546?e=1687392000&v=beta&t=wewqfk1BxwEJJCTwjS1OH_j2T7VdsCLIwTJdAtPUmBs" alt="Sudhamsh" style="width:100%">
+              <div class="container">
+                <h2>Sudhamsh Mondrati</h2>
+                <p class="title">Undergraduate Student</p>
+                <p>Aspiring software engineer that loves to work with teams!</p>
+                <p>smondra1@uncc.edu</p>
+                <p><button class="button">Contact</button></p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="column">
+            <div class="card">
+              <img src="https://media.licdn.com/dms/image/C4D03AQFVZdTtWQRcrg/profile-displayphoto-shrink_800_800/0/1645164117752?e=1687392000&v=beta&t=_RU003m73cHOYhfRRsZlqPVl8YLk6UKmp9pMp1ehVDU" alt="Melvin" style="width:100%">
+              <div class="container">
+                <h2>Melvin Priyemskiy</h2>
+                <p class="title">Early Entry Undergraduate Student</p>
+                <p>I always look forward to improve on my skills!</p>
+                <p>mpriyems@uncc.edu</p>
+                <p><button class="button">Contact</button></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="column">
+            <div class="card">
+              <img src="https://media.licdn.com/dms/image/C4E03AQHCa9tq_c-3mA/profile-displayphoto-shrink_400_400/0/1646104996835?e=1687392000&v=beta&t=VG3OnTBAt1UrDbkIKATW_LToqhpP3Yh4xRFE0tF2V08" alt="Ajay" style="width:100%">
+              <div class="container">
+                <h2>Ajay Shankar</h2>
+                <p class="title">Early Entry Undergraduate Student</p>
+                <p>My favorite stack is MERN!</p>
+                <p>ashanka6@uncc.edu</p>
+                <p><button class="button">Contact</button></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="column">
+            <div class="card">
+              <img src="https://media.licdn.com/dms/image/C5603AQF880mPElLNKQ/profile-displayphoto-shrink_400_400/0/1663906959140?e=1687392000&v=beta&t=oDNqWeYpZl9H0OJXcyhrJxHR6zwa98SsHinwwTet2ss" alt="Aiden" style="width:100%">
+              <div class="container">
+                <h2>Aiden James</h2>
+                <p class="title">Early Entry Undergraduate Student</p>
+                <p>I am an aspiring game developer!</p>
+                <p>ajames61@uncc.edu</p>
+                <p><button class="button">Contact</button></p>
+              </div>
+        </div>
+        
+        </body>
+        </html>
+        
 {{template "footer"}}
