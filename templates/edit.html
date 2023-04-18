@@ -2,7 +2,7 @@
 
 {{template "header"}}
     <h1>Edit <i>{{.post.Title}}</i> </h1>
-    <form action="/edit/{{.post.ID}}" method="post">
+    <form action="/edit/{{.post.ID.Hex}}" method="post">
         <div class="mb-3">
           <label for="exampleFormControlInput1" class="form-label">New title:</label>
           <input name="title" type="text" class="form-control" id="exampleFormControlInput1" value="{{.post.Title}}" placeholder = "Title">

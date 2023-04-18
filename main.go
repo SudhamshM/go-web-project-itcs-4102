@@ -352,11 +352,10 @@ func main() {
 		id := ctx.Param("id")
 
 		var post models.Post
-				
+		objectID, _ := primitive.ObjectIDFromHex(id)
 		postsCollection := client.Database("goDatabase").Collection("posts")
-		postsCollection.FindOne(ctx, bson.M{"_id": id}).Decode(&post)
-
-		if post == nil {
+		postsCollection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&post)
+		if post.ID == primitive.NilObjectID {
 			// if post is not there
 			ctx.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 			return
@@ -371,23 +370,22 @@ func main() {
 		title := ctx.PostForm("title")
 		body := ctx.PostForm("body")
 		id := ctx.Param("id")
-		post := getPostById(id)
 
 		postsCollection := client.Database("goDatabase").Collection("posts")
-		postsCollection.UpdateOne(ctx, bson.M{"_id": id}, bson.M{"title": title,"content": body})
-		fmt.Println("finding post...")
-		if post == nil {
+		objectID, _ := primitive.ObjectIDFromHex(id)
+		var post models.Post
+		postsCollection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&post)
+		if post.ID == primitive.NilObjectID {
 			// if post is not there
 			ctx.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 			return
 		}
-		post.TitlePost = title
-		post.ContentPost = body
 
+		update := bson.M{"$set": bson.M{"title": title,"content": body}}
+		postsCollection.UpdateOne(ctx, bson.M{"_id": objectID}, update)
+		
 		// redirect them to the post they just edited
-		ctx.HTML(http.StatusOK, "post.html", gin.H{
-			"post": post,
-		})
+		ctx.Redirect(302, "/posts/" + id)
 	})
 
 	//incomplete delete post method
