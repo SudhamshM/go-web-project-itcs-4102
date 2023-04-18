@@ -29,14 +29,14 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/posts">Posts</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/posts/new">Create Posts</a>
-                </li>
+                </li> 
             </ul>
         </div>
-        {{ if .user }}
+        {{ if .User }}
         <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="/posts/new">Create Posts</a>
+            </li>
             <li class="nav-item">
                 <a class="nav-link" href="/logout">Logout</a>
             </li>

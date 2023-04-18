@@ -1,4 +1,4 @@
-{{template "header"}}
+{{template "header" .}}
 <h1>{{.post.Title}}</h1>
 
 <p class="text-secondary">Written by {{.post.Name}}</p>
@@ -6,9 +6,9 @@
 <p>{{.post.Content}}</p>
 
 
-{{ if .user }}
+{{ if .User }}
 <div class="mb-3">
-    <form action="/edit/{{.id}}" method="get">
+    <form action="/posts/{{.id}}/edit" method="get">
         <button type="submit" class="btn btn-dark">Edit</button>
     </form>
 </div>
@@ -16,7 +16,7 @@
 <!-- added foundation for post request for delete function -->
 
 <div class="mb-3">
-    <form action="/delete/{{.id}}" method="post">
+    <form action="/posts/{{.id}}/delete" method="post">
         <button type="submit" class="btn btn-outline-danger">Delete</button>
     </form>
 </div>
