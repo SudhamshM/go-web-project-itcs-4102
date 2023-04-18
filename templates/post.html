@@ -6,7 +6,7 @@
 <p>{{.post.Content}}</p>
 
 
-
+{{ if .user }}
 <div class="mb-3">
     <form action="/edit/{{.id}}" method="get">
         <button type="submit" class="btn btn-dark">Edit</button>
@@ -14,11 +14,14 @@
 </div>
 
 <!-- added foundation for post request for delete function -->
+
 <div class="mb-3">
     <form action="/delete/{{.id}}" method="post">
         <button type="submit" class="btn btn-outline-danger">Delete</button>
     </form>
 </div>
+
+{{ end }}
 
 
 
