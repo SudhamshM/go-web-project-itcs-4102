@@ -357,6 +357,8 @@ func main() {
 		id := ctx.Param("id")
 		post := getPostById(id)
 
+		postsCollection := client.Database("goDatabase").Collection("posts")
+		postsCollection.UpdateOne(ctx, bson.M{"_id": id}, bson.M{"title": title,"content": body})
 		fmt.Println("finding post...")
 		if post == nil {
 			// if post is not there
