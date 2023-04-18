@@ -10,7 +10,6 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -72,32 +71,52 @@ func (u *PostController) GetPost(c *gin.Context) {
 	}
 }
 
-func (u *PostController) CreatePost(c *gin.Context) {
-	err := godotenv.Load(".env")
-	if err != nil {
-		panic(err)
-	}
-	var DB_URL string = os.Getenv("DB_URL")
-	clientOptions := options.Client().
-		ApplyURI(DB_URL)
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	var err2 error
-	client, err2 = mongo.Connect(ctx, clientOptions)
-	if err2 != nil {
-		panic(err2)
-	}
-	postsCollection = client.Database("goDatabase").Collection("posts")
+func (u *PostController) CreatePost(ctx *gin.Context) {
+
+	var r = ctx.Request
+
+	// var newBlog BlogPosts = BlogPosts{
+	// 	FirstName:   r.FormValue("firstName"),
+	// 	TitlePost:   r.FormValue("blogTitle"),
+	// 	ContentPost: r.FormValue("blogContent"),
+	// 	PostID:      uuid.New(),
+	// }
+
+	postsCollection := client.Database("goDatabase").Collection("posts")
+	val := sessions.Default(ctx).Get("user")
+
 	newPost := models.Post{
-		Name:    "John Wick",
-		Title:   "",
-		Content: "Go watch movie!",
+		Name:    r.FormValue("firstName"),
+		Title:   r.FormValue("blogTitle"),
+		Content: r.FormValue("blogContent"),
 		ID:      primitive.NewObjectID(),
+		UserID:  val,
 	}
-	_, insErr := postsCollection.InsertOne(c, newPost)
+	_, insErr := postsCollection.InsertOne(ctx, newPost)
 	if insErr != nil {
 		panic(insErr)
 	}
+
+	cur, findErr := postsCollection.Find(ctx, bson.M{})
+	if findErr != nil {
+		panic(findErr)
+	}
+	var result []models.Post
+	for cur.Next(ctx) {
+		var post models.Post
+		cur.Decode(&post)
+		result = append(result, post)
+	}
+	ctx.HTML(http.StatusOK, "posts.html", gin.H{
+		"error":    false,
+		"bigArray": result,
+		"hasPosts": true,
+	})
+}
+func (u *PostController) NewPost(ctx *gin.Context) {
+	ctx.HTML(http.StatusOK, "newblog.html", gin.H{
+		"Title": "Create A Post",
+	})
 }
 
 func (u *PostController) EditPost(ctx *gin.Context) {
@@ -148,5 +167,59 @@ func (u *PostController) UpdatePost(ctx *gin.Context) {
 		
 	// redirect them to the post they just edited
 	ctx.Redirect(302, "/posts/" + id)
+}
+func(u *PostController) ViewPosts(ctx *gin.Context) {
+	var DB_URL string = os.Getenv("DB_URL")
+	clientOptions := options.Client().
+		ApplyURI(DB_URL)
+	var err2 error
+	client, err2 = mongo.Connect(ctx, clientOptions)
+	if err2 != nil {
+		panic(err2)
+	}
+	postsCollection = client.Database("goDatabase").Collection("posts")
+
+	postsCollection := client.Database("goDatabase").Collection("posts")
+	cur, findErr := postsCollection.Find(ctx, bson.M{})
+	if findErr != nil {
+		panic(findErr)
+	}
+	var result []models.Post
+	for cur.Next(ctx) {
+		var post models.Post
+		cur.Decode(&post)
+		result = append(result, post)
+	}
+	ctx.HTML(http.StatusOK, "posts.html", gin.H{
+		"error":    false,
+		"bigArray": result,
+		"hasPosts": true,
+	})
+}
+func (u *PostController) DeletePost(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	var post models.Post
+	objectID, _ := primitive.ObjectIDFromHex(id)
+	postsCollection := client.Database("goDatabase").Collection("posts")
+	filter := bson.M{"_id": objectID}
+	postsCollection.FindOne(ctx, filter).Decode(&post)
+	if post.ID == primitive.NilObjectID {
+		// if post is not there
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+		return
+	}
+
+	if post.UserID != sessions.Default(ctx).Get("user") {
+				
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "User authorization failed"})
+		return
+	}
+
+
+	postsCollection.DeleteOne(ctx, filter)
+
+	ctx.Redirect(302, "/posts")
+
 }
 

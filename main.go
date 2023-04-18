@@ -7,7 +7,6 @@ import (
 	"log"
 	"main/controllers"
 
-	"main/models"
 	"main/routes"
 	"net/http"
 	"os"
@@ -35,6 +34,7 @@ var postCollection mongo.Client
 
 // controllers
 var postCtrl controllers.PostController
+var userCtrl controllers.UserController
 
 func init() {
 	err := godotenv.Load(".env")
@@ -75,6 +75,9 @@ func main() {
 	router.Static("/public/", "./public/")
 	router.SetTrustedProxies(nil)
 	router.Use(sessions.Sessions("mysession", store))
+
+	postCtrl = controllers.PostController{}
+	userCtrl = controllers.UserController{}
 
 	postRoutes := router.Group("/john")
 	userRoutes := router.Group("/user")
@@ -125,78 +128,15 @@ func main() {
 		})
 	})
 
-	postCtrl = controllers.PostController{}
-	// switch to controller defined routes for future
-	router.GET("/undefined", postCtrl.CreatePost)
-	router.GET("/undefined/:id", postCtrl.GetPost)
-	router.GET("/posts", func(ctx *gin.Context) {
-		postsCollection := client.Database("goDatabase").Collection("posts")
-		cur, findErr := postsCollection.Find(ctx, bson.M{})
-		if findErr != nil {
-			panic(findErr)
-		}
-		var result []models.Post
-		for cur.Next(ctx) {
-			var post models.Post
-			cur.Decode(&post)
-			result = append(result, post)
-		}
-		ctx.HTML(http.StatusOK, "posts.html", gin.H{
-			"error":    false,
-			"bigArray": result,
-			"hasPosts": true,
-		})
-	})
+	// post routes
 
+	router.GET("/posts", postCtrl.ViewPosts) 
 	router.GET("/posts/:id", postCtrl.GetPost)
-
-	router.GET("/posts/new", func(ctx *gin.Context) {
-		ctx.HTML(http.StatusOK, "newblog.html", gin.H{
-			"Title": "Create A Post",
-		})
-	})
-
-	router.POST("/posts", func(ctx *gin.Context) {
-		var r = ctx.Request
-
-		// var newBlog BlogPosts = BlogPosts{
-		// 	FirstName:   r.FormValue("firstName"),
-		// 	TitlePost:   r.FormValue("blogTitle"),
-		// 	ContentPost: r.FormValue("blogContent"),
-		// 	PostID:      uuid.New(),
-		// }
-
-		postsCollection := client.Database("goDatabase").Collection("posts")
-		val := sessions.Default(ctx).Get("user")
-
-		newPost := models.Post{
-			Name:    r.FormValue("firstName"),
-			Title:   r.FormValue("blogTitle"),
-			Content: r.FormValue("blogContent"),
-			ID:      primitive.NewObjectID(),
-			UserID:  val,
-		}
-		_, insErr := postsCollection.InsertOne(ctx, newPost)
-		if insErr != nil {
-			panic(insErr)
-		}
-
-		cur, findErr := postsCollection.Find(ctx, bson.M{})
-		if findErr != nil {
-			panic(findErr)
-		}
-		var result []models.Post
-		for cur.Next(ctx) {
-			var post models.Post
-			cur.Decode(&post)
-			result = append(result, post)
-		}
-		ctx.HTML(http.StatusOK, "posts.html", gin.H{
-			"error":    false,
-			"bigArray": result,
-			"hasPosts": true,
-		})
-	})
+	router.GET("/posts/new", postCtrl.NewPost) 
+	router.POST("/posts", postCtrl.CreatePost) 
+	router.GET("/edit/:id", postCtrl.EditPost)
+ 	router.POST("/edit/:id", postCtrl.UpdatePost)
+	router.POST("/delete/:id", postCtrl.DeletePost) 
 
 	/**
 	postsCollection = client.Database("goDatabase").Collection("posts")
@@ -347,36 +287,7 @@ func main() {
 	})
 
 
-	router.GET("/edit/:id", postCtrl.EditPost)
- 	router.POST("/edit/:id", postCtrl.UpdatePost)
 
-
-	router.POST("/delete/:id", func(ctx *gin.Context) {
-		id := ctx.Param("id")
-
-		var post models.Post
-		objectID, _ := primitive.ObjectIDFromHex(id)
-		postsCollection := client.Database("goDatabase").Collection("posts")
-		filter := bson.M{"_id": objectID}
-		postsCollection.FindOne(ctx, filter).Decode(&post)
-		if post.ID == primitive.NilObjectID {
-			// if post is not there
-			ctx.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
-			return
-		}
-
-		if post.UserID != sessions.Default(ctx).Get("user") {
-				
-			ctx.JSON(http.StatusNotFound, gin.H{"error": "User authorization failed"})
-			return
-		}
-
-
-		postsCollection.DeleteOne(ctx, filter)
-
-		ctx.Redirect(302, "/posts")
-
-	})
 
 	router.NoRoute(func(ctx *gin.Context) {
 
