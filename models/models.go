@@ -9,6 +9,7 @@ type Post struct {
 	Title   string             `bson:"title"`
 	Content string             `bson:"content"`
 	ID      primitive.ObjectID `bson:"_id"`
+	UserID  interface{}        `bson:"uid"`
 }
 
 type User struct {

@@ -7,7 +7,7 @@ import (
 	"log"
 	"main/controllers"
 
-	//"main/models"
+	"main/models"
 	"net/http"
 	"os"
 
@@ -30,6 +30,7 @@ var client *mongo.Client
 var usersCollection *mongo.Collection
 var store cookie.Store
 var router *gin.Engine
+var postCollection mongo.Client
 
 // controllers
 var postCtrl controllers.PostController
@@ -120,7 +121,7 @@ func main() {
 
 	postCtrl = controllers.PostController{}
 	// switch to controller defined routes for future
-	router.GET("/undefined", postCtrl.CreatePost)
+	// router.GET("/undefined", postCtrl.CreatePost)
 	router.GET("/posts", func(ctx *gin.Context) {
 		if len(bigArray) == 0 {
 			ctx.HTML(http.StatusOK, "posts.html", gin.H{
@@ -147,12 +148,29 @@ func main() {
 
 	router.POST("/posts", func(ctx *gin.Context) {
 		var r = ctx.Request
+
 		var newBlog BlogPosts = BlogPosts{
 			FirstName:   r.FormValue("firstName"),
 			TitlePost:   r.FormValue("blogTitle"),
 			ContentPost: r.FormValue("blogContent"),
 			PostID:      uuid.New(),
 		}
+
+		postsCollection := client.Database("goDatabase").Collection("posts")
+		sess, _ := store.Get(ctx.Request, "mysession")
+		val, _ := sess.Values["user"]
+		newPost := models.Post{
+			Name:    r.FormValue("firstName"),
+			Title:   r.FormValue("blogTitle"),
+			Content: r.FormValue("blogContent"),
+			ID:      primitive.NewObjectID(),
+			UserID:  val,
+		}
+		_, insErr := postsCollection.InsertOne(ctx, newPost)
+		if insErr != nil {
+			panic(insErr)
+		}
+
 		bigArray = append(bigArray, newBlog)
 		ctx.HTML(http.StatusOK, "posts.html", gin.H{
 			"error":    false,
