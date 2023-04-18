@@ -33,7 +33,7 @@ func (u *UserController) SignupUser(ctx *gin.Context) {
 	email := ctx.PostForm("email")
 	password := ctx.PostForm("password")
 
-	var currentSess sessions.Session = sessions.Default(ctx)
+	currentSess := sessions.Default(ctx)
 	// setup DB before proceeding
 	setupUserDB()
 	result := models.User{}
@@ -67,24 +67,18 @@ func (u *UserController) SignupUser(ctx *gin.Context) {
 	// showing success flash message
 
 	currentSess.AddFlash("Account successfully created", "success")
-	ok := currentSess.Flashes("success")
 	currentSess.Flashes()
 	currentSess.Save()
-	ctx.HTML(http.StatusOK, "main.html", gin.H{
-		"Title":       "Hello there",
-		"Name":        name,
-		"Body":        "Welcome to the UNC Charlotte Blog Website.",
-		"Sample":      "Students can ask their peers for any help or share any advice for their peers relating to matters such as classes, clubs, sports, or other extracurricular activities.",
-		"successMsgs": ok,
-	})
+	ctx.Redirect(http.StatusFound, "/")
 }
 
 func (u *UserController) StartLogin(ctx *gin.Context) {
 	// Logic for creating a new user
-
+	val := sessions.Default(ctx).Get("user")
 	data := Page{
 		Title: "Login",
 		Body:  "Welcome to the login page",
+		User:  val,
 	}
 	ctx.HTML(http.StatusOK, "login.html", data)
 }
@@ -160,6 +154,7 @@ type Page struct {
 	Title  string
 	Body   string
 	Sample string
+	User   interface{}
 }
 
 func getUserByEmail(ctx *gin.Context, email string) *models.User {
