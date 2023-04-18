@@ -106,7 +106,7 @@ func main() {
 
 	// user routes
 
-	router.GET("/login", userCtrl.StartSignup)
+	router.GET("/login", userCtrl.StartLogin)
 	router.POST("/login", userCtrl.LoginUser)
 	router.GET("/signup", userCtrl.StartSignup)
 	router.POST("/signup", userCtrl.SignupUser)
