@@ -130,22 +130,25 @@ func main() {
 	router.GET("/undefined", postCtrl.CreatePost)
 	router.GET("/undefined/:id", postCtrl.GetPost)
 	router.GET("/posts", func(ctx *gin.Context) {
-		if len(bigArray) == 0 {
-			ctx.HTML(http.StatusOK, "posts.html", gin.H{
-				"error":    true,
-				"hasPosts": false,
-			})
-			return
-		} else {
-			ctx.HTML(http.StatusOK, "posts.html", gin.H{
-				"error":    false,
-				"bigArray": bigArray,
-				"hasPosts": true,
-			})
+		postsCollection := client.Database("goDatabase").Collection("posts")
+		cur, findErr := postsCollection.Find(ctx, bson.M{})
+		if findErr != nil {
+			panic(findErr)
 		}
+		var result []models.Post
+		for cur.Next(ctx) {
+			var post models.Post
+			cur.Decode(&post)
+			result = append(result, post)
+		}
+		ctx.HTML(http.StatusOK, "posts.html", gin.H{
+			"error":    false,
+			"bigArray": result,
+			"hasPosts": true,
+		})
 	})
 
-	router.GET("/posts/:id", singlePost)
+	router.GET("/posts/:id", postCtrl.GetPost)
 
 	router.GET("/posts/new", func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "newblog.html", gin.H{
@@ -156,15 +159,15 @@ func main() {
 	router.POST("/posts", func(ctx *gin.Context) {
 		var r = ctx.Request
 
-		var newBlog BlogPosts = BlogPosts{
-			FirstName:   r.FormValue("firstName"),
-			TitlePost:   r.FormValue("blogTitle"),
-			ContentPost: r.FormValue("blogContent"),
-			PostID:      uuid.New(),
-		}
+		// var newBlog BlogPosts = BlogPosts{
+		// 	FirstName:   r.FormValue("firstName"),
+		// 	TitlePost:   r.FormValue("blogTitle"),
+		// 	ContentPost: r.FormValue("blogContent"),
+		// 	PostID:      uuid.New(),
+		// }
 
 		postsCollection := client.Database("goDatabase").Collection("posts")
-		sess, _ := store.Get(ctx.Request, "mysession")
+		sess, _ := store.Get(r, "mysession")
 		val, _ := sess.Values["user"]
 		newPost := models.Post{
 			Name:    r.FormValue("firstName"),
@@ -178,10 +181,19 @@ func main() {
 			panic(insErr)
 		}
 
-		bigArray = append(bigArray, newBlog)
+		cur, findErr := postsCollection.Find(ctx, bson.M{})
+		if findErr != nil {
+			panic(findErr)
+		}
+		var result []models.Post
+		for cur.Next(ctx) {
+			var post models.Post
+			cur.Decode(&post)
+			result = append(result, post)
+		}
 		ctx.HTML(http.StatusOK, "posts.html", gin.H{
 			"error":    false,
-			"bigArray": bigArray,
+			"bigArray": result,
 			"hasPosts": true,
 		})
 	})
@@ -432,22 +444,6 @@ type Users struct {
 
 // array to hold all posts
 var bigArray []BlogPosts
-
-func singlePost(c *gin.Context) {
-	id := c.Param("id")
-	post := getPostById(id)
-	fmt.Println("finding post...")
-	if post == nil {
-		// if post is not there
-		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
-		return
-	}
-
-	c.HTML(http.StatusOK, "post.html", gin.H{
-		"post": post,
-	})
-
-}
 
 // get posts by id to show specific post
 func getPostById(id string) *BlogPosts {

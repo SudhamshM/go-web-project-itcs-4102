@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
@@ -55,10 +56,18 @@ func (u *PostController) GetPost(c *gin.Context) {
 		return
 	} else {
 		fmt.Println("Post found")
+		//condtional statement checking if the post userID is equal to the session
+		//if post.userID == sessionuserID.. variable =ture
+		var userCondtion bool = false
+		if post.UserID == sessions.Default(c).Get("user") {
+			userCondtion = true
+
+		}
 
 		c.HTML(http.StatusOK, "post.html", gin.H{
 			"post": post,
 			"id":   post.ID.Hex(),
+			"user": userCondtion,
 		})
 	}
 }
