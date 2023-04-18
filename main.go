@@ -30,7 +30,6 @@ var client *mongo.Client
 var usersCollection *mongo.Collection
 var store cookie.Store
 var router *gin.Engine
-var postCollection mongo.Client
 
 // controllers
 var postCtrl controllers.PostController
@@ -130,27 +129,13 @@ func main() {
 
 	// post routes
 
-	router.GET("/posts", postCtrl.ViewPosts) 
+	router.GET("/posts", postCtrl.ViewPosts)
 	router.GET("/posts/:id", postCtrl.GetPost)
-	router.GET("/posts/new", postCtrl.NewPost) 
-	router.POST("/posts", postCtrl.CreatePost) 
+	router.GET("/posts/new", postCtrl.NewPost)
+	router.POST("/posts", postCtrl.CreatePost)
 	router.GET("/edit/:id", postCtrl.EditPost)
- 	router.POST("/edit/:id", postCtrl.UpdatePost)
-	router.POST("/delete/:id", postCtrl.DeletePost) 
-
-	/**
-	postsCollection = client.Database("goDatabase").Collection("posts")
-	newPost := models.Post{
-		Name:    "John Wick",
-		Title:   "",
-		Content: "Go watch movie!",
-		ID:      primitive.NewObjectID(),
-	}
-	_, insErr := postsCollection.InsertOne(c, newPost)
-	if insErr != nil {
-		panic(insErr)
-	}
-	*/
+	router.POST("/edit/:id", postCtrl.UpdatePost)
+	router.POST("/delete/:id", postCtrl.DeletePost)
 
 	router.GET("/about", func(ctx *gin.Context) {
 		data := Page{
@@ -286,9 +271,6 @@ func main() {
 		})
 	})
 
-
-
-
 	router.NoRoute(func(ctx *gin.Context) {
 
 		ctx.HTML(http.StatusNotFound, "error.html", gin.H{
@@ -320,19 +302,6 @@ type Users struct {
 	Username string             `bson:"username"`
 	Email    string             `bson:"email"`
 	Password string             `bson:"password"`
-}
-
-// array to hold all posts
-var bigArray []BlogPosts
-
-// get posts by id to show specific post
-func getPostById(id string) *BlogPosts {
-	for i := 0; i < len(bigArray); i++ {
-		if bigArray[i].PostID.String() == id {
-			return &bigArray[i]
-		}
-	}
-	return nil
 }
 
 func getUserByEmail(ctx *gin.Context, email string) *Users {
