@@ -346,47 +346,10 @@ func main() {
 		})
 	})
 
-	// (Aiden) editing a page:
 
-	router.GET("/edit/:id", func(ctx *gin.Context) {
-		id := ctx.Param("id")
+	router.GET("/edit/:id", postCtrl.EditPost)
+ 	router.POST("/edit/:id", postCtrl.UpdatePost)
 
-		var post models.Post
-		objectID, _ := primitive.ObjectIDFromHex(id)
-		postsCollection := client.Database("goDatabase").Collection("posts")
-		postsCollection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&post)
-		if post.ID == primitive.NilObjectID {
-			// if post is not there
-			ctx.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
-			return
-		}
-
-		ctx.HTML(http.StatusOK, "edit.html", gin.H{
-			"post": post,
-		})
-	})
-
-	router.POST("/edit/:id", func(ctx *gin.Context) {
-		title := ctx.PostForm("title")
-		body := ctx.PostForm("body")
-		id := ctx.Param("id")
-
-		postsCollection := client.Database("goDatabase").Collection("posts")
-		objectID, _ := primitive.ObjectIDFromHex(id)
-		var post models.Post
-		postsCollection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&post)
-		if post.ID == primitive.NilObjectID {
-			// if post is not there
-			ctx.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
-			return
-		}
-
-		update := bson.M{"$set": bson.M{"title": title,"content": body}}
-		postsCollection.UpdateOne(ctx, bson.M{"_id": objectID}, update)
-		
-		// redirect them to the post they just edited
-		ctx.Redirect(302, "/posts/" + id)
-	})
 
 	router.POST("/delete/:id", func(ctx *gin.Context) {
 		id := ctx.Param("id")
@@ -401,6 +364,14 @@ func main() {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 			return
 		}
+
+		if post.UserID != sessions.Default(ctx).Get("user") {
+				
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "User authorization failed"})
+			return
+		}
+
+
 		postsCollection.DeleteOne(ctx, filter)
 
 		ctx.Redirect(302, "/posts")
