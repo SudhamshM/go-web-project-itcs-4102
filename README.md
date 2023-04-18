@@ -2,7 +2,7 @@
 A simple web application built using the Go programming language in our ITCS 4102/5102 class.
 
 ## Visit Website
-Check out the deployed version [here on Render!](https://https://go-uncc-web-project.onrender.com/)
+Check out the deployed Go website [here on Render!](https://go-uncc-web-project.onrender.com/)
 ## Run
 1. First make sure to navigate to the "sample" directory in order to execute the next commands. 
 2. Download with `go mod download`
