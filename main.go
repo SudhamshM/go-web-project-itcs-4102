@@ -167,8 +167,8 @@ func main() {
 		// }
 
 		postsCollection := client.Database("goDatabase").Collection("posts")
-		sess, _ := store.Get(r, "mysession")
-		val, _ := sess.Values["user"]
+		val := sessions.Default(ctx).Get("user")
+
 		newPost := models.Post{
 			Name:    r.FormValue("firstName"),
 			Title:   r.FormValue("blogTitle"),
