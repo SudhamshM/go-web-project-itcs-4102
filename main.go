@@ -8,6 +8,7 @@ import (
 	"main/controllers"
 
 	"main/models"
+	"main/routes"
 	"net/http"
 	"os"
 
@@ -74,6 +75,11 @@ func main() {
 	router.Static("/public/", "./public/")
 	router.SetTrustedProxies(nil)
 	router.Use(sessions.Sessions("mysession", store))
+
+	postRoutes := router.Group("/john")
+	userRoutes := router.Group("/user")
+	routes.SetupPostRoutes(postRoutes)
+	routes.SetupUserRoutes(userRoutes)
 
 	router.Use(func(ctx *gin.Context) {
 		if ctx.Request.URL.String() != "/logout" {
