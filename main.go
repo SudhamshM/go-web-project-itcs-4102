@@ -1,10 +1,8 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"html/template"
-	"log"
 	"main/controllers"
 
 	"main/routes"
@@ -12,26 +10,16 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-
-	"time"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/joho/godotenv"
 )
 
-var client *mongo.Client
-var usersCollection *mongo.Collection
 var store cookie.Store
 var router *gin.Engine
 
 // controllers
-var postCtrl controllers.PostController
 var userCtrl controllers.UserController
 
 func init() {
@@ -40,17 +28,6 @@ func init() {
 	if err != nil {
 		fmt.Println("Error loading .env file")
 	}
-
-	clientOptions := options.Client().
-		ApplyURI(os.Getenv("DB_URL"))
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	var err2 error
-	client, err2 = mongo.Connect(ctx, clientOptions)
-	if err2 != nil {
-		log.Fatal(err)
-	}
-	usersCollection = client.Database("goDatabase").Collection("users")
 
 	store = cookie.NewStore([]byte(os.Getenv("SECRET_KEY")))
 	store.Options(sessions.Options{MaxAge: 60 * 60 * 24, HttpOnly: true}) // expire in 24 hours and disable cookie access from js
@@ -74,13 +51,12 @@ func main() {
 	router.SetTrustedProxies(nil)
 	router.Use(sessions.Sessions("mysession", store))
 
-	postCtrl = controllers.PostController{}
 	userCtrl = controllers.UserController{}
 
-	postRoutes := router.Group("/john")
-	userRoutes := router.Group("/user")
-	routes.SetupPostRoutes(postRoutes)
-	routes.SetupUserRoutes(userRoutes)
+	postRouterGroup := router.Group("/posts")
+	userRouterGroup := router.Group("/user")
+	routes.SetupPostRoutes(postRouterGroup)
+	routes.SetupUserRoutes(userRouterGroup)
 
 	router.Use(func(ctx *gin.Context) {
 		if ctx.Request.URL.String() != "/logout" && ctx.Request.URL.String() != "/posts/new" {
@@ -122,20 +98,11 @@ func main() {
 			"Sample":      "Students can ask their peers for any help or share any advice for their peers relating to matters such as classes, clubs, sports, or other extracurricular activities.",
 			"successMsgs": success,
 			"errorMsgs":   errMsgs,
-			"user":        val,
+			"User":        val,
 		})
 	})
 
 	// post routes
-
-	router.GET("/posts", postCtrl.ViewPosts)
-	router.GET("/posts/:id", postCtrl.GetPost)
-	router.GET("/posts/new", postCtrl.NewPost)
-	router.POST("/posts", postCtrl.CreatePost)
-	router.GET("/edit/:id", postCtrl.EditPost)
-	router.POST("/edit/:id", postCtrl.UpdatePost)
-	router.POST("/delete/:id", postCtrl.DeletePost)
-
 
 	// user routes
 
@@ -146,32 +113,34 @@ func main() {
 	router.GET("/logout", userCtrl.LogoutUser)
 
 	router.GET("/about", func(ctx *gin.Context) {
+		val := sessions.Default(ctx).Get("user")
 		data := Page{
 			Title:  "About Page!",
 			Body:   "Welcome to my about page.",
 			Sample: "ABOUT!",
+			User:   val,
 		}
+
 		ctx.HTML(http.StatusOK, "about.html", data)
 	})
 
 	router.GET("/contact", func(ctx *gin.Context) {
+		val := sessions.Default(ctx).Get("user")
 		data := Page{
 			Title:  "Contact Page",
 			Body:   "Welcome to the contact page",
 			Sample: "Please don't contact us about this site no one will response. ",
+			User:   val,
 		}
 		ctx.HTML(http.StatusOK, "contact.html", data)
 	})
 
-
-
-
-
 	router.NoRoute(func(ctx *gin.Context) {
-
+		val := sessions.Default(ctx).Get("user")
 		ctx.HTML(http.StatusNotFound, "error.html", gin.H{
 			"code":    http.StatusNotFound,
 			"message": ctx.Request.URL.String() + " could not be found.",
+			"User":    val,
 		})
 	})
 
@@ -183,28 +152,5 @@ type Page struct {
 	Title  string
 	Body   string
 	Sample string
-}
-
-// blog post struct
-type BlogPosts struct {
-	FirstName   string `json:"firstname"`
-	TitlePost   string `json:"title"`
-	ContentPost string `json:"contentpost"`
-	PostID      uuid.UUID
-}
-
-type Users struct {
-	ID       primitive.ObjectID `bson:"_id"`
-	Username string             `bson:"username"`
-	Email    string             `bson:"email"`
-	Password string             `bson:"password"`
-}
-
-func getUserByEmail(ctx *gin.Context, email string) *Users {
-	var result = Users{}
-	usersCollection.FindOne(ctx, bson.M{"email": email}).Decode(&result)
-	if result.ID == primitive.NilObjectID {
-		return nil
-	}
-	return &result
+	User   interface{}
 }

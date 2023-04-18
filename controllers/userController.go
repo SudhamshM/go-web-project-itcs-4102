@@ -1,12 +1,30 @@
 package controllers
 
 import (
+	"context"
+	"fmt"
+	"net/http"
+	"os"
+	"time"
+
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/bcrypt"
+
+	"main/models"
+
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 )
 
 type UserController struct {
 }
+
+var usersCollection *mongo.Collection
+var store cookie.Store
 
 func (u *UserController) SignupUser(ctx *gin.Context) {
 	// Logic for creating a new user
@@ -16,8 +34,9 @@ func (u *UserController) SignupUser(ctx *gin.Context) {
 	password := ctx.PostForm("password")
 
 	var currentSess sessions.Session = sessions.Default(ctx)
-
-	result := Users{}
+	// setup DB before proceeding
+	setupUserDB()
+	result := models.User{}
 	usersCollection.FindOne(ctx, bson.M{"email": email}).Decode(&result)
 	// check if user doesn't exist in db already
 	if result.Email == email {
@@ -36,7 +55,7 @@ func (u *UserController) SignupUser(ctx *gin.Context) {
 		fmt.Println(err)
 		return
 	}
-	user1 := Users{
+	user1 := models.User{
 		ID: primitive.NewObjectID(), Username: name, Email: email, Password: string(hash[:]),
 	}
 
@@ -89,6 +108,7 @@ func (u *UserController) LoginUser(ctx *gin.Context) {
 
 	email := ctx.PostForm("email")
 	password := ctx.PostForm("password")
+	setupUserDB()
 
 	user := getUserByEmail(ctx, email)
 
@@ -133,4 +153,36 @@ func (u *UserController) StartSignup(ctx *gin.Context) {
 		"errorMessage": nil,
 	})
 
+}
+
+// basic Page struct for info
+type Page struct {
+	Title  string
+	Body   string
+	Sample string
+}
+
+func getUserByEmail(ctx *gin.Context, email string) *models.User {
+	setupUserDB()
+	var result = models.User{}
+	usersCollection.FindOne(ctx, bson.M{"email": email}).Decode(&result)
+	if result.ID == primitive.NilObjectID {
+		return nil
+	}
+	return &result
+}
+
+func setupUserDB() {
+	var DB_URL string = os.Getenv("DB_URL")
+	clientOptions := options.Client().ApplyURI(DB_URL)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	var err2 error
+	client, err2 = mongo.Connect(ctx, clientOptions)
+	if err2 != nil {
+		panic(err2)
+	}
+
+	usersCollection = client.Database("goDatabase").Collection("users")
 }
