@@ -82,7 +82,7 @@ func main() {
 	routes.SetupUserRoutes(userRoutes)
 
 	router.Use(func(ctx *gin.Context) {
-		if ctx.Request.URL.String() != "/logout" {
+		if ctx.Request.URL.String() != "/logout" && ctx.Request.URL.String() != "/posts/new" {
 			ctx.Next()
 			return
 		}
@@ -93,7 +93,7 @@ func main() {
 			fmt.Println("not logged in to perfom action")
 			ctx.HTML(http.StatusUnauthorized, "error.html", gin.H{
 				"code":    401,
-				"message": "Not authorized to perform logout",
+				"message": "Not authorized to perform action",
 			})
 			ctx.Abort()
 			return
