@@ -388,25 +388,21 @@ func main() {
 		ctx.Redirect(302, "/posts/" + id)
 	})
 
-	//incomplete delete post method
-	//need to loop through the posts and derive the needed index
-	//delete the index from the bigarray
 	router.POST("/delete/:id", func(ctx *gin.Context) {
 		id := ctx.Param("id")
-		var nonsense []BlogPosts
 
-		//loop through each value in bigArray
-		for _, v := range bigArray {
-			//compare the postID to the given postID
-			if v.PostID.String() == id {
-
-			} else {
-				nonsense = append(nonsense, v)
-			}
+		var post models.Post
+		objectID, _ := primitive.ObjectIDFromHex(id)
+		postsCollection := client.Database("goDatabase").Collection("posts")
+		filter := bson.M{"_id": objectID}
+		postsCollection.FindOne(ctx, filter).Decode(&post)
+		if post.ID == primitive.NilObjectID {
+			// if post is not there
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+			return
 		}
-		bigArray = nonsense
+		postsCollection.DeleteOne(ctx, filter)
 
-		// redirect them to the post they just edited
 		ctx.Redirect(302, "/posts")
 
 	})
