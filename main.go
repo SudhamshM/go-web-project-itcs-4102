@@ -121,7 +121,8 @@ func main() {
 
 	postCtrl = controllers.PostController{}
 	// switch to controller defined routes for future
-	// router.GET("/undefined", postCtrl.CreatePost)
+	router.GET("/undefined", postCtrl.CreatePost)
+	router.GET("/undefined/:id", postCtrl.GetPost)
 	router.GET("/posts", func(ctx *gin.Context) {
 		if len(bigArray) == 0 {
 			ctx.HTML(http.StatusOK, "posts.html", gin.H{

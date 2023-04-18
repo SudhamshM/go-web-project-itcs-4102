@@ -1,21 +1,21 @@
 {{template "header"}}
-<h1>{{.post.TitlePost}}</h1>
+<h1>{{.post.Title}}</h1>
 
-<p class="text-secondary">Written by {{.post.FirstName}}</p>
+<p class="text-secondary">Written by {{.post.Name}}</p>
 
-<p>{{.post.ContentPost}}</p>
+<p>{{.post.Content}}</p>
 
 
 
 <div class="mb-3">
-    <form action="/edit/{{.post.PostID}}" method="get">
+    <form action="/edit/{{.id}}" method="get">
         <button type="submit" class="btn btn-dark">Edit</button>
     </form>
 </div>
 
 <!-- added foundation for post request for delete function -->
 <div class="mb-3">
-    <form action="/delete/{{.post.PostID}}" method="post">
+    <form action="/delete/{{.id}}" method="post">
         <button type="submit" class="btn btn-outline-danger">Delete</button>
     </form>
 </div>
