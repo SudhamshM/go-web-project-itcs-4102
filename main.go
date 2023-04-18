@@ -346,7 +346,6 @@ func main() {
 		})
 	})
 
-	// (Aiden) editing a page:
 
 	router.GET("/edit/:id", func(ctx *gin.Context) {
 		id := ctx.Param("id")
@@ -360,6 +359,13 @@ func main() {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 			return
 		}
+		// var userCondition bool = false
+		if post.UserID != sessions.Default(ctx).Get("user") {
+				
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "User authorization failed"})
+			return
+		}
+
 
 		ctx.HTML(http.StatusOK, "edit.html", gin.H{
 			"post": post,
@@ -380,6 +386,12 @@ func main() {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 			return
 		}
+		if post.UserID != sessions.Default(ctx).Get("user") {
+				
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "User authorization failed"})
+			return
+		}
+
 
 		update := bson.M{"$set": bson.M{"title": title,"content": body}}
 		postsCollection.UpdateOne(ctx, bson.M{"_id": objectID}, update)
@@ -401,6 +413,14 @@ func main() {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 			return
 		}
+
+		if post.UserID != sessions.Default(ctx).Get("user") {
+				
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "User authorization failed"})
+			return
+		}
+
+
 		postsCollection.DeleteOne(ctx, filter)
 
 		ctx.Redirect(302, "/posts")
