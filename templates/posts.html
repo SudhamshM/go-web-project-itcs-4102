@@ -8,9 +8,9 @@
         <div class="col-sm-3 pb-1">
           <div class="card shadow-sm">
             <div class="card-body">
-                <h5 class="card-title">{{$element.TitlePost}}</h5>
-                <p class="card-text">Author: {{$element.FirstName}} </p>
-                <a href="/posts/{{$element.PostID}}" class="btn btn-primary">Read it here</a>
+                <h5 class="card-title">{{$element.Title}}</h5>
+                <p class="card-text">Author: {{$element.Name}} </p>
+                <a href="/posts/{{$element.ID.Hex}}" class="btn btn-primary">Read it here</a>
               </div>
           </div>
         </div>
