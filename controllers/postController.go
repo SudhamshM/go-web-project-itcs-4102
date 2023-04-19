@@ -23,8 +23,7 @@ type PostController struct {
 }
 
 func (u *PostController) GetPost(c *gin.Context) {
-	// Logic for creating a new user
-	fmt.Println("getting post")
+	fmt.Println("Getting post.")
 	setupPostDB()
 	objectID, idErr := primitive.ObjectIDFromHex(c.Param("id"))
 	if idErr != nil {
@@ -44,9 +43,9 @@ func (u *PostController) GetPost(c *gin.Context) {
 		c.Abort()
 		return
 	} else {
-		fmt.Println("Post found")
+		fmt.Println("Post found.")
 		//condtional statement checking if the post userID is equal to the session
-		//if post.userID == sessionuserID.. variable =ture
+		//if post.userID == sessionuserID.. variable =true
 		var userCondtion bool = false
 		if post.UserID == sessions.Default(c).Get("user") {
 			userCondtion = true

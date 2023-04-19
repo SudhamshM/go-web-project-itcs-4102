@@ -43,11 +43,14 @@ func main() {
 	template.Must(t.ParseGlob("templates/partials/*.html"))
 	router = gin.Default()
 	router.SetHTMLTemplate(t)
+
+	// setting static, sessions and auth middleware
 	router.Static("/public/", "./public/")
 	router.SetTrustedProxies(nil)
 	router.Use(sessions.Sessions("mysession", store))
-	router.Use(AuthRequired)
+	router.Use(AuthRequired())
 
+	// setting up routes to their controllers
 	userMainRouterGroup := router.Group("/")
 	postRouterGroup := router.Group("/posts")
 
@@ -74,25 +77,28 @@ type Page struct {
 	User   interface{}
 }
 
-func AuthRequired(ctx *gin.Context) {
-	if ctx.Request.URL.String() != "/logout" && ctx.Request.URL.String() != "/posts/new" {
+// middleware to check user authorized to perform action
+func AuthRequired() gin.HandlerFunc {
+	// returns the context handler function
+	return func(ctx *gin.Context) {
+		if ctx.Request.URL.String() != "/logout" && ctx.Request.URL.String() != "/posts/new" {
+			ctx.Next()
+			return
+		}
+		fmt.Println("Auth middleware on.")
+		sess := sessions.Default(ctx)
+		val := sess.Get("user")
+		if val == nil {
+			fmt.Println("not logged in to perfom action")
+			ctx.HTML(http.StatusUnauthorized, "error.html", gin.H{
+				"code":    401,
+				"message": "Not authorized to perform action",
+			})
+			ctx.Abort()
+			return
+		}
+		fmt.Println(val)
+		fmt.Println("User authorized, middleware off.")
 		ctx.Next()
-		return
 	}
-	fmt.Println("auth middleware on")
-	sess := sessions.Default(ctx)
-	val := sess.Get("user")
-	if val == nil {
-		fmt.Println("not logged in to perfom action")
-		ctx.HTML(http.StatusUnauthorized, "error.html", gin.H{
-			"code":    401,
-			"message": "Not authorized to perform action",
-		})
-		ctx.Abort()
-		return
-	}
-	fmt.Println(val)
-	fmt.Println("user authorized")
-	fmt.Println("middleware off")
-	ctx.Next()
 }
