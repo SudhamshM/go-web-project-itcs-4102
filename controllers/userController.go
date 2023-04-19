@@ -75,6 +75,7 @@ func (u *UserController) SignupUser(ctx *gin.Context) {
 func (u *UserController) StartLogin(ctx *gin.Context) {
 	// Logic for creating a new user
 	val := sessions.Default(ctx).Get("user")
+	// fmt.Println(val).... add check if user is already logged in to prevent from going here
 	data := Page{
 		Title: "Login",
 		Body:  "Welcome to the login page",
@@ -120,10 +121,10 @@ func (u *UserController) LoginUser(ctx *gin.Context) {
 		if pwdCheck == nil {
 			fmt.Println("login success")
 			// store user id in session
-			sess, _ := store.Get(ctx.Request, "mysession")
-			sess.Values["user"] = user.ID.String()
+			sess := sessions.Default(ctx)
+			sess.Set("user", user.ID.String())
 			sess.AddFlash("You have successfully logged in!", "success")
-			sess.Save(ctx.Request, ctx.Writer)
+			sess.Save()
 			ctx.Redirect(302, "/")
 			return
 		} else {
