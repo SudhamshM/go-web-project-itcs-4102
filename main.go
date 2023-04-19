@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"html/template"
-	"main/controllers"
 
 	"main/routes"
 	"net/http"
@@ -18,9 +17,6 @@ import (
 
 var store cookie.Store
 var router *gin.Engine
-
-// controllers
-var userCtrl controllers.UserController
 
 func init() {
 	err := godotenv.Load(".env")
@@ -50,90 +46,13 @@ func main() {
 	router.Static("/public/", "./public/")
 	router.SetTrustedProxies(nil)
 	router.Use(sessions.Sessions("mysession", store))
+	router.Use(AuthRequired)
 
-	userCtrl = controllers.UserController{}
-
+	userMainRouterGroup := router.Group("/")
 	postRouterGroup := router.Group("/posts")
-	userRouterGroup := router.Group("/user")
+
+	routes.SetupUserRoutes(userMainRouterGroup)
 	routes.SetupPostRoutes(postRouterGroup)
-	routes.SetupUserRoutes(userRouterGroup)
-
-	router.Use(func(ctx *gin.Context) {
-		if ctx.Request.URL.String() != "/logout" && ctx.Request.URL.String() != "/posts/new" {
-			ctx.Next()
-			return
-		}
-		fmt.Println("auth middleware on")
-		sess, _ := store.Get(ctx.Request, "mysession")
-		val, ok := sess.Values["user"]
-		if !ok {
-			fmt.Println("not logged in to perfom action")
-			ctx.HTML(http.StatusUnauthorized, "error.html", gin.H{
-				"code":    401,
-				"message": "Not authorized to perform action",
-			})
-			ctx.Abort()
-			return
-		}
-		fmt.Println(val)
-		fmt.Println("user authorized")
-		fmt.Println("middleware off")
-		ctx.Next()
-	})
-
-	// route handlers
-	router.GET("/", func(ctx *gin.Context) {
-		success := sessions.Default(ctx).Flashes("success")
-		errMsgs := sessions.Default(ctx).Flashes("error")
-
-		// clearing the flash before rendering
-		sessions.Default(ctx).Flashes()
-		sessions.Default(ctx).Save()
-		// either object id string or nil
-		val := sessions.Default(ctx).Get("user")
-
-		ctx.HTML(http.StatusOK, "main.html", gin.H{
-			"Title":       "Hello there",
-			"Body":        "Welcome to the UNC Charlotte Blog Website.",
-			"Sample":      "Students can ask their peers for any help or share any advice for their peers relating to matters such as classes, clubs, sports, or other extracurricular activities.",
-			"successMsgs": success,
-			"errorMsgs":   errMsgs,
-			"User":        val,
-		})
-	})
-
-	// post routes
-
-	// user routes
-
-	router.GET("/login", userCtrl.StartLogin)
-	router.POST("/login", userCtrl.LoginUser)
-	router.GET("/signup", userCtrl.StartSignup)
-	router.POST("/signup", userCtrl.SignupUser)
-	router.GET("/logout", userCtrl.LogoutUser)
-
-	router.GET("/about", func(ctx *gin.Context) {
-		val := sessions.Default(ctx).Get("user")
-		data := Page{
-			Title:  "About Page!",
-			Body:   "Welcome to my about page.",
-			Sample: "ABOUT!",
-			User:   val,
-		}
-
-		ctx.HTML(http.StatusOK, "about.html", data)
-	})
-
-	router.GET("/contact", func(ctx *gin.Context) {
-		val := sessions.Default(ctx).Get("user")
-		data := Page{
-			Title:  "Contact Page",
-			Body:   "Welcome to the contact page",
-			Sample: "Please don't contact us about this site no one will response. ",
-			User:   val,
-		}
-		ctx.HTML(http.StatusOK, "contact.html", data)
-	})
 
 	router.NoRoute(func(ctx *gin.Context) {
 		val := sessions.Default(ctx).Get("user")
@@ -147,10 +66,33 @@ func main() {
 	router.Run(":" + host)
 }
 
-// basic Page struct for info
+// basic Page struct for info and user
 type Page struct {
 	Title  string
 	Body   string
 	Sample string
 	User   interface{}
+}
+
+func AuthRequired(ctx *gin.Context) {
+	if ctx.Request.URL.String() != "/logout" && ctx.Request.URL.String() != "/posts/new" {
+		ctx.Next()
+		return
+	}
+	fmt.Println("auth middleware on")
+	sess := sessions.Default(ctx)
+	val := sess.Get("user")
+	if val == nil {
+		fmt.Println("not logged in to perfom action")
+		ctx.HTML(http.StatusUnauthorized, "error.html", gin.H{
+			"code":    401,
+			"message": "Not authorized to perform action",
+		})
+		ctx.Abort()
+		return
+	}
+	fmt.Println(val)
+	fmt.Println("user authorized")
+	fmt.Println("middleware off")
+	ctx.Next()
 }

@@ -17,14 +17,12 @@ import (
 	"main/models"
 
 	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
 )
 
 type UserController struct {
 }
 
 var usersCollection *mongo.Collection
-var store cookie.Store
 
 func (u *UserController) SignupUser(ctx *gin.Context) {
 	// Logic for creating a new user
