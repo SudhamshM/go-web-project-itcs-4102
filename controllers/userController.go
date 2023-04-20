@@ -79,7 +79,17 @@ func (u *UserController) StartLogin(ctx *gin.Context) {
 		Body:  "Welcome to the login page",
 		User:  val,
 	}
-	ctx.HTML(http.StatusOK, "login.html", data)
+
+	if val == nil {
+		ctx.HTML(http.StatusOK, "login.html", data)
+
+	} else {
+		sessions.Default(ctx).AddFlash("You cannot login while already logging in", "warning")
+		sessions.Default(ctx).Save()
+		fmt.Println("You cannot login while already logging in")
+		ctx.Redirect(302, "/")
+	}
+
 }
 
 func (u *UserController) LogoutUser(ctx *gin.Context) {
