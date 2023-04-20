@@ -148,13 +148,21 @@ func (u *UserController) LoginUser(ctx *gin.Context) {
 
 func (u *UserController) StartSignup(ctx *gin.Context) {
 	// Logic for creating a new user
+	val := sessions.Default(ctx).Get("user")
 
-	ctx.HTML(http.StatusOK, "signup.html", gin.H{
-		"Title":        "Sign Up",
-		"Body":         "Welcome to the sign up page",
-		"error":        nil,
-		"errorMessage": nil,
-	})
+	if val == nil {
+		ctx.HTML(http.StatusOK, "signup.html", gin.H{
+			"Title":        "Sign Up",
+			"Body":         "Welcome to the sign up page",
+			"error":        nil,
+			"errorMessage": nil,
+		})
+	} else {
+		sessions.Default(ctx).AddFlash("You cannot signup while already logged in", "warning")
+		sessions.Default(ctx).Save()
+		fmt.Println("You cannot signup while already logging in")
+		ctx.Redirect(302, "/")
+	}
 
 }
 
