@@ -43,10 +43,9 @@ func (m *MainController) GetAbout(ctx *gin.Context) {
 func (m *MainController) GetContact(ctx *gin.Context) {
 	val := sessions.Default(ctx).Get("user")
 	data := Page{
-		Title:  "Contact Page",
-		Body:   "Welcome to the contact page",
-		Sample: "Please don't contact us about this site no one will response. ",
-		User:   val,
+		Title: "Contact Page",
+		Body:  "Welcome to the contact page",
+		User:  val,
 	}
 	ctx.HTML(http.StatusOK, "contact.html", data)
 }
