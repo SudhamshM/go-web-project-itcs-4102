@@ -6,7 +6,7 @@
 <p>{{.post.Content}}</p>
 
 
-{{ if .User }}
+{{ if .Author }}
 <div class="mb-3">
     <form action="/posts/{{.id}}/edit" method="get">
         <button type="submit" class="btn btn-dark">Edit</button>

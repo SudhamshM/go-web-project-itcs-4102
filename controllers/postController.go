@@ -47,15 +47,17 @@ func (u *PostController) GetPost(c *gin.Context) {
 		//condtional statement checking if the post userID is equal to the session
 		//if post.userID == sessionuserID.. variable =true
 		var userCondtion bool = false
-		if post.UserID == sessions.Default(c).Get("user") {
+		val := sessions.Default(c).Get("user")
+		if post.UserID == val {
 			userCondtion = true
 
 		}
 
 		c.HTML(http.StatusOK, "post.html", gin.H{
-			"post": post,
-			"id":   post.ID.Hex(),
-			"User": userCondtion,
+			"post":   post,
+			"id":     post.ID.Hex(),
+			"Author": userCondtion,
+			"User":   val,
 		})
 	}
 }
